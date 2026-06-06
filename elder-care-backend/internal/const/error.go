@@ -47,6 +47,8 @@ var (
 
 	ErrorCodeUserNotExist      = register(200021, "用户不存在")
 	ErrorCodeUserStatusInvalid = register(200022, "用户状态非法")
+
+	ErrorCodeBannerNotExist = register(200101, "轮播图不存在")
 )
 
 // StatusCode returns the HTTP status code mapped to errCode.
@@ -80,6 +82,9 @@ func StatusCode(errCode int) int {
 		return http.StatusBadRequest
 
 	case ErrorCodeUserNotExist, ErrorCodeUserStatusInvalid:
+		return http.StatusBadRequest
+
+	case ErrorCodeBannerNotExist:
 		return http.StatusBadRequest
 
 	default:
