@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/choveylee/tlog"
@@ -38,10 +39,62 @@ func HandleListArticlesClient(c *gin.Context) {
 		return
 	}
 
-	listArticlesRespData, errx := service.ListArticlesClient(ctx, categoryId)
+	pageNum := 1
+
+	srcPageNum := strings.TrimSpace(c.Query("page_num"))
+	if srcPageNum != "" {
+		desPageNum, err := strconv.Atoi(srcPageNum)
+		if err != nil {
+			errMsg := tlog.E(ctx).Err(err).Msgf("Handle list articles client (page num: %s) err (strconv atoi %v)",
+				srcPageNum, err)
+
+			SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+			return
+		}
+
+		if desPageNum <= 0 || desPageNum > constant.MaxPageNum {
+			errMsg := tlog.E(ctx).Msgf("Handle list articles client (page num: %d) err (page num invalid)",
+				desPageNum)
+
+			SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+			return
+		}
+
+		pageNum = desPageNum
+	}
+
+	pageSize := 10
+
+	srcPageSize := strings.TrimSpace(c.Query("page_size"))
+	if srcPageSize != "" {
+		desPageSize, err := strconv.Atoi(srcPageSize)
+		if err != nil {
+			errMsg := tlog.E(ctx).Err(err).Msgf("Handle list articles client (page size: %s) err (strconv atoi %v)",
+				srcPageSize, err)
+
+			SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+			return
+		}
+
+		if desPageSize <= 0 || desPageSize > constant.MaxPageSize {
+			errMsg := tlog.E(ctx).Msgf("Handle list articles client (page size: %d) err (page size invalid)",
+				desPageSize)
+
+			SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+			return
+		}
+
+		pageSize = desPageSize
+	}
+
+	listArticlesRespData, errx := service.ListArticlesClient(ctx, categoryId, pageNum, pageSize)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list articles client (category id: %s) err (list articles client %v)",
-			categoryId, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list articles client (category id: %s, page num: %d, page size: %d) err (list articles client %v)",
+			categoryId, pageNum, pageSize, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 

@@ -29,3 +29,17 @@ type ListArticlesClientRespData struct {
 
 	Total int64 `json:"total"`
 }
+
+type GetArticleClientRespData struct {
+	ArticleId string `json:"article_id"`
+
+	Title string `json:"title"`
+
+	Abstract string `json:"abstract"`
+	Content  string `json:"content"`
+
+	CoverUrl string `json:"cover_url"`
+	LinkUrl  string `json:"link_url"`
+
+	PublishAt string `json:"publish_at"`
+}

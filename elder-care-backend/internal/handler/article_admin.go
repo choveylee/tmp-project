@@ -48,7 +48,7 @@ func HandleListArticleCategoriesAdmin(c *gin.Context) {
 		status = desStatus
 	}
 
-	pageNum := -1
+	pageNum := 1
 
 	srcPageNum := strings.TrimSpace(c.Query("page_num"))
 	if srcPageNum != "" {
@@ -74,7 +74,7 @@ func HandleListArticleCategoriesAdmin(c *gin.Context) {
 		pageNum = desPageNum
 	}
 
-	pageSize := -1
+	pageSize := 10
 
 	srcPageSize := strings.TrimSpace(c.Query("page_size"))
 	if srcPageSize != "" {
@@ -331,7 +331,7 @@ func HandleListArticlesAdmin(c *gin.Context) {
 		status = desStatus
 	}
 
-	pageNum := -1
+	pageNum := 1
 
 	srcPageNum := strings.TrimSpace(c.Query("page_num"))
 	if srcPageNum != "" {
@@ -357,7 +357,7 @@ func HandleListArticlesAdmin(c *gin.Context) {
 		pageNum = desPageNum
 	}
 
-	pageSize := -1
+	pageSize := 10
 
 	srcPageSize := strings.TrimSpace(c.Query("page_size"))
 	if srcPageSize != "" {
