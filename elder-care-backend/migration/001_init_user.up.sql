@@ -43,6 +43,6 @@ CREATE TABLE IF NOT EXISTS access_logs
     `created_at` DATETIME     NOT NULL,
     PRIMARY KEY (`id`),
     INDEX idx_user (`user_id`)
-) NGINE = InnoDB
+) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='访问日志';
