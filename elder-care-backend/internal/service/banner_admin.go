@@ -80,7 +80,12 @@ func GetBannerAdmin(ctx context.Context, userId string, bannerId string) (*data.
 	}
 
 	if bannerDB == nil {
-		return nil, nil
+		errMsg := tlog.E(ctx).Msgf("Get banner admin (user id: %s, banner id: %s) err (banner id invalid)",
+			userId, bannerId)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("banner id"), constant.ErrorCodeBannerNotExist, errMsg)
+
+		return nil, errx
 	}
 
 	getBannerRespData := &data.GetBannerAdminRespData{

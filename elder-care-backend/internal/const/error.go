@@ -49,6 +49,12 @@ var (
 	ErrorCodeUserStatusInvalid = register(200022, "用户状态非法")
 
 	ErrorCodeBannerNotExist = register(200101, "轮播图不存在")
+
+	ErrorCodeArticleCategoryNameExist = register(200111, "文章分类名称已存在")
+	ErrorCodeArticleCategoryNotExist  = register(200112, "文章分类不存在")
+	ErrorCodeArticleCategoryInUse     = register(200113, "文章分类正在使用中")
+
+	ErrorCodeArticleNotExist = register(200121, "文章不存在")
 )
 
 // StatusCode returns the HTTP status code mapped to errCode.
@@ -85,6 +91,12 @@ func StatusCode(errCode int) int {
 		return http.StatusBadRequest
 
 	case ErrorCodeBannerNotExist:
+		return http.StatusBadRequest
+
+	case ErrorCodeArticleCategoryNameExist, ErrorCodeArticleCategoryNotExist, ErrorCodeArticleCategoryInUse:
+		return http.StatusBadRequest
+
+	case ErrorCodeArticleNotExist:
 		return http.StatusBadRequest
 
 	default:

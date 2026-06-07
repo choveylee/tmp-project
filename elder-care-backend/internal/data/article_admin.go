@@ -14,7 +14,7 @@ type ArticleCategoryAdminData struct {
 }
 
 type ListArticleCategoriesAdminRespData struct {
-	Categories []*ArticleCategoryClientData `json:"categories"`
+	Categories []*ArticleCategoryAdminData `json:"categories"`
 
 	Total int64 `json:"total"`
 }
