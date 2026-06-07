@@ -11,11 +11,16 @@ require (
 	github.com/choveylee/tlog v0.0.0-20260502054322-af6bbcc65693
 	github.com/choveylee/tserver v0.0.0-20260502062415-3811fb362b02
 	github.com/choveylee/tutil v0.0.0-20260502021941-11dd7442fd05
+	github.com/dlclark/regexp2 v1.12.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-sql-driver/mysql v1.10.0
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/golang-migrate/migrate/v4 v4.19.1
+	github.com/minio/minio-go/v7 v7.2.0
+	github.com/mojocn/base64Captcha v1.3.8
 	github.com/redis/go-redis/v9 v9.20.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
+	golang.org/x/crypto v0.51.0
 	gorm.io/gen v0.3.28
 	gorm.io/gorm v1.31.1
 )
@@ -72,10 +77,8 @@ require (
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/minio/crc64nvme v1.1.1 // indirect
 	github.com/minio/md5-simd v1.1.2 // indirect
-	github.com/minio/minio-go/v7 v7.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/mojocn/base64Captcha v1.3.8 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/oklog/ulid/v2 v2.1.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.3.1 // indirect
@@ -118,7 +121,6 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/arch v0.26.0 // indirect
-	golang.org/x/crypto v0.51.0 // indirect
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f // indirect
 	golang.org/x/image v0.23.0 // indirect
 	golang.org/x/mod v0.35.0 // indirect

@@ -7,6 +7,7 @@ import (
 	"github.com/choveylee/terror"
 	"github.com/choveylee/tlog"
 	"github.com/choveylee/tutil"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	constant "dev.choveylee.top/elder-care-backend/internal/const"
@@ -49,6 +50,16 @@ type User struct {
 }
 
 func CreateUser(ctx context.Context, roleId, name, mobile, password string, status int) (*User, *terror.Terror) {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		errMsg := tlog.E(ctx).Err(err).Msgf("Create user (role id: %s, name: %s, mobile: %s, status: %d) err (generate from password %v)",
+			roleId, name, mobile, status, err)
+
+		errx := terror.NewTerror(ctx, err, constant.ErrorCodeUnknownServerAbnormal, errMsg)
+
+		return nil, errx
+	}
+
 	userDB := &User{
 		Id: tutil.NewOid().String(),
 
@@ -56,7 +67,7 @@ func CreateUser(ctx context.Context, roleId, name, mobile, password string, stat
 
 		Name:     name,
 		Mobile:   mobile,
-		Password: password,
+		Password: string(passwordHash),
 
 		Status: status,
 	}
@@ -114,7 +125,7 @@ func FindUserByMobile(ctx context.Context, mobile string) (*User, *terror.Terror
 	return usersDB[0], nil
 }
 
-func FindUsersByRole(ctx context.Context, roleId string, status int, pageNum, pageSize int) (int64, []*User, *terror.Terror) {
+func FindUsers(ctx context.Context, roleId string, status int, pageNum, pageSize int) (int64, []*User, *terror.Terror) {
 	query := serverClient.DB(ctx, runMode).Model(&User{})
 
 	if roleId != "" {
@@ -210,8 +221,18 @@ func UpdateUser(ctx context.Context, userId, roleId, name, mobile string, status
 }
 
 func UpdateUserPassword(ctx context.Context, userId, password string) *terror.Terror {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		errMsg := tlog.E(ctx).Err(err).Msgf("Update user password (user id: %s) err (generate from password %v)",
+			userId, err)
+
+		errx := terror.NewTerror(ctx, err, constant.ErrorCodeUnknownServerAbnormal, errMsg)
+
+		return errx
+	}
+
 	params := map[string]interface{}{
-		"password": password,
+		"password": string(passwordHash),
 
 		"updated_at": time.Now(),
 	}

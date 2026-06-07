@@ -67,7 +67,7 @@ func CreateArticleCategoryAdmin(ctx context.Context, userId string, name string,
 		return nil, errx
 	}
 
-	articleCategoryDB, errx := dbmodel.CreateArticleCategory(ctx, name, weight, status)
+	articleCategoryDB, errx = dbmodel.CreateArticleCategory(ctx, name, weight, status)
 	if errx != nil {
 		errMsg := tlog.E(ctx).Err(errx).Msgf("Create article category admin (user id: %s, name: %s, weight: %d, status: %d) err (db create article category %v)",
 			userId, name, weight, status, errx)

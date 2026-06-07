@@ -42,11 +42,15 @@ var (
 
 	ErrorCodeCaptchaInvalid = register(200001, "验证码非法")
 
-	ErrorCodePasswordRetryLimit = register(200011, "密码重试上限")
-	ErrorCodePasswordNotMatch   = register(200012, "密码错误")
+	ErrorCodeRoleNotExist = register(200011, "角色不存在")
 
-	ErrorCodeUserNotExist      = register(200021, "用户不存在")
-	ErrorCodeUserStatusInvalid = register(200022, "用户状态非法")
+	ErrorCodePasswordRetryLimit = register(200021, "密码重试上限")
+	ErrorCodePasswordNotMatch   = register(200022, "密码错误")
+
+	ErrorCodeUserNotExist      = register(200031, "用户不存在")
+	ErrorCodeUserStatusInvalid = register(200032, "用户状态非法")
+	ErrorCodeUserMobileExist   = register(200033, "用户手机号已存在")
+	ErrorCodeUserRoleInvalid   = register(200034, "用户角色非法")
 
 	ErrorCodeBannerNotExist = register(200101, "轮播图不存在")
 
@@ -84,10 +88,13 @@ func StatusCode(errCode int) int {
 	case ErrorCodeCaptchaInvalid:
 		return http.StatusBadRequest
 
+	case ErrorCodeRoleNotExist:
+		return http.StatusBadRequest
+
 	case ErrorCodePasswordRetryLimit, ErrorCodePasswordNotMatch:
 		return http.StatusBadRequest
 
-	case ErrorCodeUserNotExist, ErrorCodeUserStatusInvalid:
+	case ErrorCodeUserNotExist, ErrorCodeUserStatusInvalid, ErrorCodeUserMobileExist, ErrorCodeUserRoleInvalid:
 		return http.StatusBadRequest
 
 	case ErrorCodeBannerNotExist:

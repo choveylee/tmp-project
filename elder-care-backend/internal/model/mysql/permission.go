@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 
 	constant "dev.choveylee.top/elder-care-backend/internal/const"
+)
 
 const (
 	PermissionTypeMenu   = 1

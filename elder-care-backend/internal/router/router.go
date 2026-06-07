@@ -41,6 +41,8 @@ func NewRouter(ctx context.Context) *gin.Engine {
 	adminAuthRouter := router.Group("/api/v1/admin")
 	adminAuthRouter.Use(middleware.AdminAuthMiddleware())
 
+	registerUserAdmin(adminAuthRouter)
+
 	registerBannerAdmin(adminAuthRouter)
 	registerArticleAdmin(adminAuthRouter)
 

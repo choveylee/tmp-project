@@ -35,7 +35,7 @@ func initMinio(ctx context.Context) *terror.Terror {
 	if minioEndpoint == "" {
 		errMsg := tlog.E(ctx).Msgf("init minio err (minio endpoint illegal).")
 
-		errx := terror.NewRawTerror(ctx, terror.ErrConfIllegal("minio endpoint"), errMsg)
+		errx := terror.NewRawTerror(ctx, terror.ErrConfInvalid("minio endpoint"), errMsg)
 
 		return errx
 	}
@@ -44,7 +44,7 @@ func initMinio(ctx context.Context) *terror.Terror {
 	if minioEndpoint2 == "" {
 		errMsg := tlog.E(ctx).Msgf("init minio err (minio endpoint2 illegal).")
 
-		errx := terror.NewRawTerror(ctx, terror.ErrConfIllegal("minio endpoint2"), errMsg)
+		errx := terror.NewRawTerror(ctx, terror.ErrConfInvalid("minio endpoint2"), errMsg)
 
 		return errx
 	}
@@ -53,7 +53,7 @@ func initMinio(ctx context.Context) *terror.Terror {
 	if minioAccessKey == "" {
 		errMsg := tlog.E(ctx).Msgf("init minio err (minio access key illegal).")
 
-		errx := terror.NewRawTerror(ctx, terror.ErrConfIllegal("minio access key"), errMsg)
+		errx := terror.NewRawTerror(ctx, terror.ErrConfInvalid("minio access key"), errMsg)
 
 		return errx
 	}
@@ -62,7 +62,7 @@ func initMinio(ctx context.Context) *terror.Terror {
 	if minioSecretKey == "" {
 		errMsg := tlog.E(ctx).Msgf("init minio err (minio secret key illegal).")
 
-		errx := terror.NewRawTerror(ctx, terror.ErrConfIllegal("minio secret key"), errMsg)
+		errx := terror.NewRawTerror(ctx, terror.ErrConfInvalid("minio secret key"), errMsg)
 
 		return errx
 	}
@@ -71,7 +71,7 @@ func initMinio(ctx context.Context) *terror.Terror {
 	if minioBucket == "" {
 		errMsg := tlog.E(ctx).Msgf("init minio err (minio bucket illegal).")
 
-		errx := terror.NewRawTerror(ctx, terror.ErrConfIllegal("minio bucket"), errMsg)
+		errx := terror.NewRawTerror(ctx, terror.ErrConfInvalid("minio bucket"), errMsg)
 
 		return errx
 	}
