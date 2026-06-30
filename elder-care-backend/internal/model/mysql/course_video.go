@@ -170,8 +170,8 @@ func DeleteCourseVideo(ctx context.Context, videoId string) *terror.Terror {
 	return nil
 }
 
-func DeleteCourseVideos(ctx context.Context, courseId string) *terror.Terror {
-	retGorm := serverClient.DB(ctx, runMode).Where("course_id = ?", courseId).Delete(&CourseVideo{})
+func DeleteCourseVideos(ctx context.Context, tx *gorm.DB, courseId string) *terror.Terror {
+	retGorm := tx.Where("course_id = ?", courseId).Delete(&CourseVideo{})
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course videos (course id: %s) err (db delete %v)",
 			courseId, retGorm.Error)
