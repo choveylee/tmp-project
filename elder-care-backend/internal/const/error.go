@@ -59,6 +59,17 @@ var (
 	ErrorCodeArticleCategoryInUse     = register(200113, "文章分类正在使用中")
 
 	ErrorCodeArticleNotExist = register(200121, "文章不存在")
+
+	ErrorCodeCourseCategoryNameExist = register(200131, "课程分类名称已存在")
+	ErrorCodeCourseCategoryNotExist  = register(200132, "课程分类不存在")
+	ErrorCodeCourseCategoryInUse     = register(200133, "课程分类正在使用中")
+
+	ErrorCodeCourseNotExist       = register(200211, "课程不存在")
+	ErrorCodeCourseInvalid        = register(200212, "课程无效")
+	ErrorCodeCourseTypeInvalid    = register(200216, "课程类型非法")
+	ErrorCodeCourseDetailNotExist = register(200217, "课程详情不存在")
+
+	ErrorCodeCourseVideoNotExist = register(200221, "课程视频不存在")
 )
 
 // StatusCode returns the HTTP status code mapped to errCode.
@@ -104,6 +115,15 @@ func StatusCode(errCode int) int {
 		return http.StatusBadRequest
 
 	case ErrorCodeArticleNotExist:
+		return http.StatusBadRequest
+
+	case ErrorCodeCourseCategoryNameExist, ErrorCodeCourseCategoryNotExist, ErrorCodeCourseCategoryInUse:
+		return http.StatusBadRequest
+
+	case ErrorCodeCourseNotExist, ErrorCodeCourseInvalid, ErrorCodeCourseTypeInvalid, ErrorCodeCourseDetailNotExist:
+		return http.StatusBadRequest
+
+	case ErrorCodeCourseVideoNotExist:
 		return http.StatusBadRequest
 
 	default:

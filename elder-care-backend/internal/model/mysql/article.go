@@ -105,7 +105,11 @@ func FindArticle(ctx context.Context, articleId string) (*Article, *terror.Terro
 }
 
 func FindArticles(ctx context.Context, categoryId string, status int, pageNum, pageSize int) (int64, []*Article, *terror.Terror) {
-	query := serverClient.DB(ctx, runMode).Where("category_id = ?", categoryId)
+	query := serverClient.DB(ctx, runMode)
+
+	if categoryId != "" {
+		query = query.Where("category_id = ?", categoryId)
+	}
 
 	if status != -1 {
 		query = query.Where("status = ?", status)

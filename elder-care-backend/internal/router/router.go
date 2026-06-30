@@ -29,6 +29,7 @@ func NewRouter(ctx context.Context) *gin.Engine {
 
 	registerBannerClient(clientRouter)
 	registerArticleClient(clientRouter)
+	registerCourseClient(clientRouter)
 
 	clientAuthRouter := router.Group("/api/v1/public")
 	clientAuthRouter.Use(middleware.ClientAuthMiddleware())
@@ -45,6 +46,7 @@ func NewRouter(ctx context.Context) *gin.Engine {
 
 	registerBannerAdmin(adminAuthRouter)
 	registerArticleAdmin(adminAuthRouter)
+	registerCourseAdmin(adminAuthRouter)
 
 	return router
 }
