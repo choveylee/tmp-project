@@ -342,13 +342,15 @@ func CreateCourseAdmin(ctx context.Context, userId string, categoryId string, co
 			return errx
 		}
 
-		_, errx = dbmodel.CreateCourseTags(ctx, tx, courseId, tags)
-		if errx != nil {
-			errMsg := tlog.E(ctx).Err(errx).Msgf("Create course admin (user id: %s, category id: %s, course type: %d, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db create course tags %v)",
-				userId, categoryId, courseType, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
-			errx.AttachErrMsg(errMsg)
+		if len(tags) > 0 {
+			_, errx = dbmodel.CreateCourseTags(ctx, tx, courseId, tags)
+			if errx != nil {
+				errMsg := tlog.E(ctx).Err(errx).Msgf("Create course admin (user id: %s, category id: %s, course type: %d, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db create course tags %v)",
+					userId, categoryId, courseType, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+				errx.AttachErrMsg(errMsg)
 
-			return errx
+				return errx
+			}
 		}
 
 		return nil
@@ -478,11 +480,167 @@ func GetCourseAdmin(ctx context.Context, userId string, courseId string) (*data.
 }
 
 func UpdateCourseAdmin(ctx context.Context, userId string, courseId string, categoryId string, author, source string, title string, tags []string, abstract string, coverUrl, linkUrl string, detail, summary, objective, outline, references string, publishAt *time.Time, status int) *terror.Terror {
+	courseDB, errx := dbmodel.FindCourse(ctx, courseId)
+	if errx != nil {
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db find course %v)",
+			userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+		errx.AttachErrMsg(errMsg)
 
+		return errx
+	}
+
+	if courseDB == nil {
+		errMsg := tlog.E(ctx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (course not exist)",
+			userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("course id"), constant.ErrorCodeCourseNotExist, errMsg)
+
+		return errx
+	}
+
+	if categoryId != courseDB.CategoryId {
+		courseCategoryDB, errx := dbmodel.FindCourseCategory(ctx, categoryId)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db find course category %v)",
+				userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		if courseCategoryDB == nil {
+			errMsg := tlog.E(ctx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (course category not exist)",
+				userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status)
+
+			errx := terror.NewTerror(ctx, terror.ErrParamInvalid("category id"), constant.ErrorCodeCourseCategoryNotExist, errMsg)
+
+			return errx
+		}
+	}
+
+	err := dbmodel.DB(ctx).Transaction(func(tx *gorm.DB) error {
+		errx := dbmodel.UpdateCourse(ctx, tx, courseId, author, source, title, abstract, coverUrl, linkUrl, publishAt, status)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db update course %v)",
+				userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		errx = dbmodel.UpdateCourseDetail(ctx, tx, courseId, detail, summary, objective, outline, references)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db update course detail %v)",
+				userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		errx = dbmodel.DeleteCourseTags(ctx, tx, courseId)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db delete course tags %v)",
+				userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		if len(tags) > 0 {
+			_, errx = dbmodel.CreateCourseTags(ctx, tx, courseId, tags)
+			if errx != nil {
+				errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db create course tags %v)",
+					userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)
+				errx.AttachErrMsg(errMsg)
+
+				return errx
+			}
+		}
+
+		return nil
+	})
+	if err != nil {
+		errMsg := tlog.E(ctx).Err(err).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db transaction %v)",
+			userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, err)
+
+		errx := terror.NewTerror(ctx, terror.ErrSvcAbnormal("db transaction"), constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
 }
 
 func DeleteCourseAdmin(ctx context.Context, userId string, courseId string) *terror.Terror {
+	courseDB, errx := dbmodel.FindCourse(ctx, courseId)
+	if errx != nil {
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Delete course admin (user id: %s, course id: %s) err (db find course %v)",
+			userId, courseId, errx)
+		errx.AttachErrMsg(errMsg)
 
+		return errx
+	}
+
+	if courseDB == nil {
+		errMsg := tlog.E(ctx).Msgf("Delete course admin (user id: %s, course id: %s) err (course not exist)",
+			userId, courseId)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("course id"), constant.ErrorCodeCourseNotExist, errMsg)
+
+		return errx
+	}
+
+	// TODO: 如果收藏了，是否需要处理？
+
+	err := dbmodel.DB(ctx).Transaction(func(tx *gorm.DB) error {
+		errx := dbmodel.DeleteCourse(ctx, tx, courseId)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Delete course admin (user id: %s, course id: %s) err (db delete course %v)",
+				userId, courseId, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		errx = dbmodel.DeleteCourseDetail(ctx, tx, courseId)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Delete course admin (user id: %s, course id: %s) err (db delete course detail %v)",
+				userId, courseId, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		errx = dbmodel.DeleteCourseTags(ctx, tx, courseId)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Delete course admin (user id: %s, course id: %s) err (db delete course tags %v)",
+				userId, courseId, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		errx = dbmodel.DeleteCourseVideos(ctx, tx, courseId)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Delete course admin (user id: %s, course id: %s) err (db delete course videos %v)",
+				userId, courseId, errx)
+			errx.AttachErrMsg(errMsg)
+
+			return errx
+		}
+
+		return nil
+	})
+	if err != nil {
+		errMsg := tlog.E(ctx).Err(err).Msgf("Delete course admin (user id: %s, course id: %s) err (db transaction %v)",
+			userId, courseId, err)
+
+		errx := terror.NewTerror(ctx, terror.ErrSvcAbnormal("db transaction"), constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
 }
 
 func ListCourseVideosAdmin(ctx context.Context, userId string, courseId string) (*data.ListCourseVideosAdminRespData, *terror.Terror) {

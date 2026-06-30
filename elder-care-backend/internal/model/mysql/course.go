@@ -225,7 +225,7 @@ func FindCourseCountByCategory(ctx context.Context, categoryId string) (int64, *
 	return total, nil
 }
 
-func UpdateCourse(ctx context.Context, tx *gorm.DB, courseId string, author, source, title, abstract, coverUrl, linkUrl string, publishAt time.Time, status int) *terror.Terror {
+func UpdateCourse(ctx context.Context, tx *gorm.DB, courseId string, author, source, title, abstract, coverUrl, linkUrl string, publishAt *time.Time, status int) *terror.Terror {
 	params := map[string]interface{}{
 		"author": author,
 		"source": source,
@@ -245,6 +245,20 @@ func UpdateCourse(ctx context.Context, tx *gorm.DB, courseId string, author, sou
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Update course (course id: %s, author: %s, source: %s, title: %s, abstract: %s, cover url: %s, link url: %s, publish at: %v, status: %d) err (db update %v)",
 			courseId, author, source, title, abstract, coverUrl, linkUrl, publishAt, status, retGorm.Error)
+
+		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
+}
+
+func DeleteCourse(ctx context.Context, tx *gorm.DB, courseId string) *terror.Terror {
+	retGorm := tx.Delete(&Course{}, "id = ?", courseId)
+	if retGorm.Error != nil {
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course (course id: %s) err (db delete %v)",
+			courseId, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 

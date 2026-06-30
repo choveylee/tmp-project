@@ -26,7 +26,7 @@ type CourseTag struct {
 	DeletedAt gorm.DeletedAt
 }
 
-func CreateCourseTags(ctx context.Context, tx *gorm.DB, courseId string, names []string) (*CourseTag, *terror.Terror) {
+func CreateCourseTags(ctx context.Context, tx *gorm.DB, courseId string, names []string) ([]*CourseTag, *terror.Terror) {
 	courseTagsDB := make([]*CourseTag, 0)
 
 	for _, name := range names {
@@ -49,6 +49,8 @@ func CreateCourseTags(ctx context.Context, tx *gorm.DB, courseId string, names [
 
 		return nil, errx
 	}
+
+	return courseTagsDB, nil
 }
 
 func FindCourseTags(ctx context.Context, courseId string) ([]*CourseTag, *terror.Terror) {
@@ -65,4 +67,18 @@ func FindCourseTags(ctx context.Context, courseId string) ([]*CourseTag, *terror
 	}
 
 	return courseTagsDB, nil
+}
+
+func DeleteCourseTags(ctx context.Context, tx *gorm.DB, courseId string) *terror.Terror {
+	retGorm := tx.Where("course_id = ?", courseId).Delete(&CourseTag{})
+	if retGorm.Error != nil {
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course tags (course id: %s) err (db delete %v)",
+			courseId, retGorm.Error)
+
+		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
 }

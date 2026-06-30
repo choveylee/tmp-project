@@ -169,3 +169,16 @@ func DeleteCourseVideo(ctx context.Context, videoId string) *terror.Terror {
 
 	return nil
 }
+
+func DeleteCourseVideos(ctx context.Context, courseId string) *terror.Terror {
+	retGorm := serverClient.DB(ctx, runMode).Where("course_id = ?", courseId).Delete(&CourseVideo{})
+	if retGorm.Error != nil {
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course videos (course id: %s) err (db delete %v)",
+			courseId, retGorm.Error)
+		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
+}

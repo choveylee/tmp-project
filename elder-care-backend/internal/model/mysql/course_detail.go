@@ -78,3 +78,42 @@ func FindCourseDetail(ctx context.Context, courseId string) (*CourseDetail, *ter
 
 	return courseDetailsDB[0], nil
 }
+
+func UpdateCourseDetail(ctx context.Context, tx *gorm.DB, courseId string, detail, summary, objective, outline, references string) *terror.Terror {
+	params := map[string]interface{}{
+		"detail": detail,
+
+		"summary":    summary,
+		"objective":  objective,
+		"outline":    outline,
+		"references": references,
+
+		"updated_at": time.Now(),
+	}
+
+	retGorm := tx.Model(&CourseDetail{}).Where("id = ?", courseId).Updates(params)
+	if retGorm.Error != nil {
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Update course detail (course id: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s) err (db update %v)",
+			courseId, detail, summary, objective, outline, references, retGorm.Error)
+
+		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
+}
+
+func DeleteCourseDetail(ctx context.Context, tx *gorm.DB, courseId string) *terror.Terror {
+	retGorm := tx.Where("id = ?", courseId).Delete(&CourseDetail{})
+	if retGorm.Error != nil {
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course detail (course id: %s) err (db delete %v)",
+			courseId, retGorm.Error)
+
+		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return errx
+	}
+
+	return nil
+}
