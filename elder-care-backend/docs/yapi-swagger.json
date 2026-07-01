@@ -1159,16 +1159,14 @@
     },
     "CourseCatalogVideoAdminRequest": {
       "type": "object",
-      "required": ["video_url", "format", "language", "size", "duration", "upload_at", "status"],
+      "required": ["video_url", "format", "language", "size", "duration", "upload_at"],
       "properties": {
         "video_url": { "type": "string", "maxLength": 1024 },
         "format": { "type": "string", "maxLength": 32 },
         "language": { "type": "string", "maxLength": 32 },
         "size": { "type": "string", "maxLength": 32 },
         "duration": { "type": "string", "maxLength": 32 },
-        "upload_at": { "type": "string", "description": "RFC3339格式" },
-        "weight": { "type": "integer" },
-        "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" }
+        "upload_at": { "type": "string", "description": "RFC3339格式" }
       }
     },
     "CreateCourseCatalogAdminRequest": {

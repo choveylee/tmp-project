@@ -99,13 +99,13 @@
 | PUT | `/api/v1/admin/courses/{id}` | 编辑课程 | `id`，body 同创建课程但不含 `course_type` |
 | DELETE | `/api/v1/admin/courses/{id}` | 删除课程 | `id` |
 | GET | `/api/v1/admin/courses/{id}/catalogs` | 课程目录列表 | `id`，响应含 `catalogs[].video` |
-| POST | `/api/v1/admin/courses/{id}/catalogs` | 创建课程目录 | `id`，body: `parent_id`、`name`、`weight`、`status`、`video` |
+| POST | `/api/v1/admin/courses/{id}/catalogs` | 创建课程目录 | `id`，body: `parent_id`、`name`、`weight`、`status`、`video`；`video` 不含 `weight/status` |
 | PUT | `/api/v1/admin/courses/catalogs/{id}` | 编辑课程目录 | `id`，body 同创建课程目录，增删改目录时同步处理 `video` 信息 |
 | DELETE | `/api/v1/admin/courses/catalogs/{id}` | 删除课程目录 | `id`，同时删除对应视频 |
 
 管理端枚举：
 
 - 轮播图、文章、文章分类、课程分类 `status`：`1` 正常，`0` 禁用。
-- 课程、课程目录与课程视频 `status`：`0` 正常，`1` 禁用。
+- 课程与课程目录 `status`：`0` 正常，`1` 禁用。
 - 课程 `course_type`：`0` 普通课程，`1` 视频课程。
 

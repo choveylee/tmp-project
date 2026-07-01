@@ -1161,23 +1161,10 @@ func HandleCreateCourseCatalogAdmin(c *gin.Context) {
 		return
 	}
 
-	videoWeight := video.Weight
-
-	videoStatus := video.Status
-	_, ok = dbmodel.CourseVideoStatusesMap[videoStatus]
-	if !ok {
-		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (video status: %d) err (video status invalid)",
-			videoStatus)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	createCourseCatalogRespData, errx := service.CreateCourseCatalogAdmin(ctx, userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
+	createCourseCatalogRespData, errx := service.CreateCourseCatalogAdmin(ctx, userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, video weight: %d, video status: %d) err (create course catalog admin %v)",
-			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v) err (create course catalog admin %v)",
+			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 
@@ -1360,23 +1347,10 @@ func HandleUpdateCourseCatalogAdmin(c *gin.Context) {
 		return
 	}
 
-	videoWeight := video.Weight
-
-	videoStatus := video.Status
-	_, ok = dbmodel.CourseVideoStatusesMap[videoStatus]
-	if !ok {
-		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (video status: %d) err (video status invalid)",
-			videoStatus)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	errx := service.UpdateCourseCatalogAdmin(ctx, userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
+	errx := service.UpdateCourseCatalogAdmin(ctx, userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, video weight: %d, video status: %d) err (update course catalog admin %v)",
-			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v) err (update course catalog admin %v)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 

@@ -203,7 +203,7 @@ func ListCourseCatalogsClient(ctx context.Context, courseId string) (*data.ListC
 	courseVideosDBMap := make(map[string]*dbmodel.CourseVideo)
 
 	if len(catalogIds) > 0 {
-		courseVideosDB, errx := dbmodel.FindCourseVideosByCatalog(ctx, catalogIds, dbmodel.CourseVideoStatusNormal)
+		courseVideosDB, errx := dbmodel.FindCourseVideosByCatalog(ctx, catalogIds)
 		if errx != nil {
 			errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs client (course id: %s, catalog ids: %v) err (db find course videos %v)",
 				courseId, catalogIds, errx)

@@ -221,9 +221,6 @@ type CourseCatalogVideoAdminRequest struct {
 	Duration string `json:"duration"`
 
 	UploadAt string `json:"upload_at"`
-
-	Weight int `json:"weight"`
-	Status int `json:"status"`
 }
 
 type CreateCourseCatalogAdminRequest struct {

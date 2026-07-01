@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS course_tags
 (
     id         VARCHAR(24)   NOT NULL,
     course_id  VARCHAR(24)   NOT NULL COMMENT '课程ID',
-    name       VARCHAR(1024) NOT NULL COMMENT '标签',
+    name       VARCHAR(1024) NOT NULL COMMENT '名称',
     created_at DATETIME      NOT NULL,
     deleted_at DATETIME      NULL,
     PRIMARY KEY (id),
@@ -91,13 +91,11 @@ CREATE TABLE IF NOT EXISTS course_videos
     size       VARCHAR(255)  NOT NULL COMMENT '大小',
     duration   VARCHAR(255)  NOT NULL COMMENT '时长',
     upload_at  DATETIME      NOT NULL COMMENT '上传时间',
-    weight     INT           NOT NULL COMMENT '权重',
-    status     INT           NOT NULL COMMENT '状态：0-正常，1-禁用',
     created_at DATETIME      NOT NULL,
     updated_at DATETIME      NOT NULL,
     deleted_at DATETIME      NULL,
     PRIMARY KEY (id),
-    INDEX idx_catalog (catalog_id)
+    INDEX idx_catalog (catalog_id, created_at)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='课程视频';

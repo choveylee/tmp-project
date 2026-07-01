@@ -711,7 +711,7 @@ func ListCourseCatalogsAdmin(ctx context.Context, userId string, courseId string
 	courseVideosDBMap := make(map[string]*dbmodel.CourseVideo)
 
 	if len(catalogIds) > 0 {
-		courseVideosDB, errx := dbmodel.FindCourseVideosByCatalog(ctx, catalogIds, -1)
+		courseVideosDB, errx := dbmodel.FindCourseVideosByCatalog(ctx, catalogIds)
 		if errx != nil {
 			errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs admin (user id: %s, course id: %s, catalog ids: %v) err (db find course videos %v)",
 				userId, courseId, catalogIds, errx)
@@ -769,19 +769,19 @@ func ListCourseCatalogsAdmin(ctx context.Context, userId string, courseId string
 	return listCourseCatalogsRespData, nil
 }
 
-func CreateCourseCatalogAdmin(ctx context.Context, userId string, courseId string, parentId string, name string, weight, status int, videoUrl string, format, language, size, duration string, uploadAt time.Time, videoWeight, videoStatus int) (*data.CreateCourseCatalogAdminRespData, *terror.Terror) {
+func CreateCourseCatalogAdmin(ctx context.Context, userId string, courseId string, parentId string, name string, weight, status int, videoUrl string, format, language, size, duration string, uploadAt time.Time) (*data.CreateCourseCatalogAdminRespData, *terror.Terror) {
 	courseDB, errx := dbmodel.FindCourse(ctx, courseId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s, video weight: %d, video status: %d) err (db find course %v)",
-			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db find course %v)",
+			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return nil, errx
 	}
 
 	if courseDB == nil {
-		errMsg := tlog.E(ctx).Msgf("Create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s, video weight: %d, video status: %d) err (course not exist)",
-			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
+		errMsg := tlog.E(ctx).Msgf("Create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (course not exist)",
+			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("course id"), constant.ErrorCodeCourseNotExist, errMsg)
 
@@ -831,10 +831,10 @@ func CreateCourseCatalogAdmin(ctx context.Context, userId string, courseId strin
 
 		catalogId = courseCatalogDB.Id
 
-		_, errx = dbmodel.CreateCourseVideo(ctx, tx, catalogId, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
+		_, errx = dbmodel.CreateCourseVideo(ctx, tx, catalogId, videoUrl, format, language, size, duration, uploadAt)
 		if errx != nil {
-			errMsg := tlog.E(ctx).Err(errx).Msgf("Create course catalog admin (user id: %s, catalog id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s, video weight: %d, video status: %d) err (db create course video %v)",
-				userId, catalogId, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus, errx)
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Create course catalog admin (user id: %s, catalog id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db create course video %v)",
+				userId, catalogId, videoUrl, format, language, size, duration, uploadAt, errx)
 			errx.AttachErrMsg(errMsg)
 
 			return errx
@@ -858,7 +858,7 @@ func CreateCourseCatalogAdmin(ctx context.Context, userId string, courseId strin
 	return createCourseCatalogRespData, nil
 }
 
-func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId string, parentId string, name string, weight, status int, videoUrl string, format, language, size, duration string, uploadAt time.Time, videoWeight, videoStatus int) *terror.Terror {
+func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId string, parentId string, name string, weight, status int, videoUrl string, format, language, size, duration string, uploadAt time.Time) *terror.Terror {
 	courseCatalogDB, errx := dbmodel.FindCourseCatalog(ctx, catalogId)
 	if errx != nil {
 		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (db find course catalog %v)",
@@ -926,7 +926,7 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 		}
 
 		if courseVideoDB == nil {
-			_, errx = dbmodel.CreateCourseVideo(ctx, tx, catalogId, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
+			_, errx = dbmodel.CreateCourseVideo(ctx, tx, catalogId, videoUrl, format, language, size, duration, uploadAt)
 			if errx != nil {
 				errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (db create course video %v)",
 					userId, catalogId, errx)
@@ -940,7 +940,7 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 
 		videoId := courseVideoDB.Id
 
-		errx = dbmodel.UpdateCourseVideo(ctx, tx, videoId, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
+		errx = dbmodel.UpdateCourseVideo(ctx, tx, videoId, videoUrl, format, language, size, duration, uploadAt)
 		if errx != nil {
 			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, video id: %s) err (db update course video %v)",
 				userId, catalogId, courseVideoDB.Id, errx)
