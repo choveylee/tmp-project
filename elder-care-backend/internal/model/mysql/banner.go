@@ -125,7 +125,7 @@ func FindBanners(ctx context.Context, status int, pageNum, pageSize int) (int64,
 		retGorm = retGorm.Offset((pageNum - 1) * pageSize).Limit(pageSize)
 	}
 
-	retGorm = query.Order("weight ASC, created_at DESC").Find(&bannersDB)
+	retGorm = retGorm.Order("weight ASC, created_at DESC").Find(&bannersDB)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find banners (status: %d, page num: %d, page size: %d) err (db find %v)",
 			status, pageNum, pageSize, retGorm.Error)

@@ -405,6 +405,7 @@
         "summary": "课程分类列表",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
+          { "$ref": "#/parameters/RequiredModuleCodeQuery" },
           { "$ref": "#/parameters/NormalDisabledStatusQuery" },
           { "$ref": "#/parameters/PageNumQuery" },
           { "$ref": "#/parameters/PageSizeQuery" }
@@ -724,17 +725,15 @@
     },
     "ArticleCategoryClientData": {
       "type": "object",
-        "properties": {
-          "category_id": { "type": "string" },
-          "module_id": { "type": "string" },
-          "name": { "type": "string" }
+      "properties": {
+        "category_id": { "type": "string" },
+        "name": { "type": "string" }
       }
     },
     "ArticleCategoryAdminData": {
       "type": "object",
-        "properties": {
-          "category_id": { "type": "string" },
-        "module_id": { "type": "string" },
+      "properties": {
+        "category_id": { "type": "string" },
         "name": { "type": "string", "maxLength": 32 },
         "weight": { "type": "integer" },
         "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" },
@@ -751,9 +750,8 @@
     },
     "CreateArticleCategoryAdminRequest": {
       "type": "object",
-      "required": ["module_code", "name", "status"],
+      "required": ["name", "status"],
       "properties": {
-        "module_code": { "type": "string", "maxLength": 32 },
         "name": { "type": "string", "maxLength": 32 },
         "weight": { "type": "integer" },
         "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
@@ -890,6 +888,7 @@
       "type": "object",
       "properties": {
         "category_id": { "type": "string" },
+        "module_id": { "type": "string" },
         "name": { "type": "string" }
       }
     },
@@ -897,7 +896,8 @@
       "type": "object",
       "properties": {
         "category_id": { "type": "string" },
-        "name": { "type": "string", "maxLength": 64 },
+        "module_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 32 },
         "weight": { "type": "integer" },
         "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" },
         "created_at": { "type": "string" },
@@ -913,9 +913,10 @@
     },
     "CreateCourseCategoryAdminRequest": {
       "type": "object",
-      "required": ["name", "status"],
+      "required": ["module_code", "name", "status"],
       "properties": {
-        "name": { "type": "string", "maxLength": 64 },
+        "module_code": { "type": "string", "maxLength": 32 },
+        "name": { "type": "string", "maxLength": 32 },
         "weight": { "type": "integer" },
         "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
       }
@@ -1168,10 +1169,10 @@
       "required": ["video_url", "format", "language", "size", "duration", "upload_at"],
       "properties": {
         "video_url": { "type": "string", "maxLength": 1024 },
-        "format": { "type": "string", "maxLength": 32 },
-        "language": { "type": "string", "maxLength": 32 },
-        "size": { "type": "string", "maxLength": 32 },
-        "duration": { "type": "string", "maxLength": 32 },
+        "format": { "type": "string", "maxLength": 255 },
+        "language": { "type": "string", "maxLength": 255 },
+        "size": { "type": "string", "maxLength": 255 },
+        "duration": { "type": "string", "maxLength": 255 },
         "upload_at": { "type": "string", "description": "RFC3339格式" }
       }
     },

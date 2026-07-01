@@ -220,9 +220,22 @@ func ListCourseCatalogsClient(ctx context.Context, courseId string) (*data.ListC
 		return nil, errx
 	}
 
+	courseCatalogsDBMap := make(map[string]*dbmodel.CourseCatalog)
+
+	for _, courseCatalogDB := range courseCatalogsDB {
+		courseCatalogsDBMap[courseCatalogDB.Id] = courseCatalogDB
+	}
+
 	catalogIds := make([]string, 0, len(courseCatalogsDB))
 
 	for _, courseCatalogDB := range courseCatalogsDB {
+		if courseCatalogDB.ParentId != "" {
+			_, ok := courseCatalogsDBMap[courseCatalogDB.ParentId]
+			if !ok {
+				continue
+			}
+		}
+
 		catalogIds = append(catalogIds, courseCatalogDB.Id)
 	}
 
@@ -248,6 +261,13 @@ func ListCourseCatalogsClient(ctx context.Context, courseId string) (*data.ListC
 	}
 
 	for _, courseCatalogDB := range courseCatalogsDB {
+		if courseCatalogDB.ParentId != "" {
+			_, ok := courseCatalogsDBMap[courseCatalogDB.ParentId]
+			if !ok {
+				continue
+			}
+		}
+
 		courseCatalogData := &data.CourseCatalogClientData{
 			CatalogId: courseCatalogDB.Id,
 

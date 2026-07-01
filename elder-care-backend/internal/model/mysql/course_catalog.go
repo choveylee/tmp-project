@@ -112,6 +112,22 @@ func FindCourseCatalogs(ctx context.Context, courseId string, status int) ([]*Co
 	return courseCatalogsDB, nil
 }
 
+func FindCourseCatalogsByParent(ctx context.Context, parentId string) ([]*CourseCatalog, *terror.Terror) {
+	courseCatalogsDB := make([]*CourseCatalog, 0)
+
+	retGorm := serverClient.DB(ctx, runMode).Where("parent_id = ?", parentId).Find(&courseCatalogsDB)
+	if retGorm.Error != nil {
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find course catalogs (parent id: %s) err (db find %v)",
+			parentId, retGorm.Error)
+
+		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
+
+		return nil, errx
+	}
+
+	return courseCatalogsDB, nil
+}
+
 func UpdateCourseCatalog(ctx context.Context, tx *gorm.DB, catalogId, parentId, name string, weight, status int) *terror.Terror {
 	params := map[string]interface{}{
 		"parent_id": parentId,
@@ -135,11 +151,11 @@ func UpdateCourseCatalog(ctx context.Context, tx *gorm.DB, catalogId, parentId, 
 	return nil
 }
 
-func DeleteCourseCatalog(ctx context.Context, tx *gorm.DB, catalogId string) *terror.Terror {
-	retGorm := tx.Where("id = ?", catalogId).Delete(&CourseCatalog{})
+func DeleteCourseCatalogsById(ctx context.Context, tx *gorm.DB, catalogIds []string) *terror.Terror {
+	retGorm := tx.Where("id IN (?)", catalogIds).Delete(&CourseCatalog{})
 	if retGorm.Error != nil {
-		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course catalog (catalog id: %s) err (db delete %v)",
-			catalogId, retGorm.Error)
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course catalogs by id (catalog ids: %v) err (db delete %v)",
+			catalogIds, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 
