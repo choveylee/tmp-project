@@ -3,6 +3,8 @@ package data
 type CourseCategoryClientData struct {
 	CategoryId string `json:"category_id"`
 
+	ModuleId string `json:"module_id"`
+
 	Name string `json:"name"`
 }
 

@@ -1,13 +1,29 @@
+CREATE TABLE IF NOT EXISTS course_modules
+(
+    id         VARCHAR(24) NOT NULL,
+    code       VARCHAR(32) NOT NULL COMMENT '编码',
+    name       VARCHAR(32) NOT NULL COMMENT '名称',
+    created_at DATETIME    NOT NULL,
+    updated_at DATETIME    NOT NULL,
+    deleted_at DATETIME    NULL,
+    PRIMARY KEY (id),
+    UNIQUE INDEX idx_code (code)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='课程模块';
+
 CREATE TABLE IF NOT EXISTS course_categories
 (
     id         VARCHAR(24) NOT NULL,
+    module_id  VARCHAR(24) NOT NULL COMMENT '模块ID',
     name       VARCHAR(32) NOT NULL COMMENT '名称',
     weight     INT         NOT NULL COMMENT '权重',
     status     TINYINT(1)  NOT NULL COMMENT '状态：1-正常，0-禁用',
     created_at DATETIME    NOT NULL,
     updated_at DATETIME    NOT NULL,
     deleted_at DATETIME    NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    INDEX idx_module (module_id, name)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='课程分类';

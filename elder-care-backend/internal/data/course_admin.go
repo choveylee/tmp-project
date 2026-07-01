@@ -3,6 +3,8 @@ package data
 type CourseCategoryAdminData struct {
 	CategoryId string `json:"category_id"`
 
+	ModuleId string `json:"module_id"`
+
 	Name string `json:"name"`
 
 	Weight int `json:"weight"`
@@ -20,6 +22,8 @@ type ListCourseCategoriesAdminRespData struct {
 }
 
 type CreateCourseCategoryAdminRequest struct {
+	ModuleCode string `json:"module_code"`
+
 	Name string `json:"name"`
 
 	Weight int `json:"weight"`
@@ -34,6 +38,8 @@ type CreateCourseCategoryAdminRespData struct {
 type GetCourseCategoryAdminRespData struct {
 	CategoryId string `json:"category_id"`
 
+	ModuleId string `json:"module_id"`
+
 	Name string `json:"name"`
 
 	Weight int `json:"weight"`
@@ -45,6 +51,8 @@ type GetCourseCategoryAdminRespData struct {
 }
 
 type UpdateCourseCategoryAdminRequest struct {
+	ModuleCode string `json:"module_code"`
+
 	Name string `json:"name"`
 
 	Weight int `json:"weight"`

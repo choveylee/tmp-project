@@ -31,14 +31,14 @@
 | GET | `/api/v1/public/articles/categories` | 文章分类列表 | 无 |
 | GET | `/api/v1/public/articles` | 文章列表 | `category_id` 必填，`page_num`，`page_size` |
 | GET | `/api/v1/public/articles/{id}` | 文章详情 | `id` |
-| GET | `/api/v1/public/courses/categories` | 课程分类列表 | 无 |
+| GET | `/api/v1/public/courses/categories` | 课程分类列表 | `module_code` 必填 |
 | GET | `/api/v1/public/courses` | 课程列表 | `category_id` 必填，`course_type`，`sort_by`，`page_num`，`page_size` |
 | GET | `/api/v1/public/courses/{id}` | 课程详情 | `id` |
 | GET | `/api/v1/public/courses/{id}/catalogs` | 课程目录列表 | `id`，响应含 `catalogs[].video` |
 
 公开端枚举：
 
-- `course_type`：`0` 普通课程，`1` 视频课程。
+- `course_type`：`0` 视频课程，`1` 图文课程。
 - `sort_by`：`publish` 发布时间，`view` 浏览量，`favourite` 收藏量。
 
 ## 管理端通用与登录
@@ -88,10 +88,10 @@
 
 | 方法 | 路径 | 名称 | 参数 |
 |---|---|---|---|
-| GET | `/api/v1/admin/courses/categories` | 课程分类列表 | `status`，`page_num`，`page_size` |
-| POST | `/api/v1/admin/courses/categories` | 创建课程分类 | `name`、`weight`、`status` |
+| GET | `/api/v1/admin/courses/categories` | 课程分类列表 | `module_code` 必填，`status`，`page_num`，`page_size` |
+| POST | `/api/v1/admin/courses/categories` | 创建课程分类 | `module_code`、`name`、`weight`、`status` |
 | GET | `/api/v1/admin/courses/categories/{id}` | 课程分类详情 | `id` |
-| PUT | `/api/v1/admin/courses/categories/{id}` | 编辑课程分类 | `id`，body: `name`、`weight`、`status` |
+| PUT | `/api/v1/admin/courses/categories/{id}` | 编辑课程分类 | `id`，body: `module_code`、`name`、`weight`、`status` |
 | DELETE | `/api/v1/admin/courses/categories/{id}` | 删除课程分类 | `id` |
 | GET | `/api/v1/admin/courses` | 课程列表 | `category_id`，`course_type`，`status`，`page_num`，`page_size` |
 | POST | `/api/v1/admin/courses` | 创建课程 | `category_id`、`course_type`、`author`、`source`、`title`、`tags`、`abstract`、`cover_url`、`link_url`、`detail`、`summary`、`objective`、`outline`、`references`、`publish_at`、`status` |
@@ -107,5 +107,4 @@
 
 - 轮播图、文章、文章分类、课程分类 `status`：`1` 正常，`0` 禁用。
 - 课程与课程目录 `status`：`0` 正常，`1` 禁用。
-- 课程 `course_type`：`0` 普通课程，`1` 视频课程。
-
+- 课程 `course_type`：`0` 视频课程，`1` 图文课程。

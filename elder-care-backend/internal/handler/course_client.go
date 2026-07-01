@@ -15,10 +15,19 @@ import (
 func HandleListCourseCategoriesClient(c *gin.Context) {
 	ctx := c.Request.Context()
 
-	listCourseCategoriesRespData, errx := service.ListCourseCategoriesClient(ctx)
+	moduleCode := strings.TrimSpace(c.Query("module_code"))
+	if moduleCode == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle list course categories client err (module code invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	listCourseCategoriesRespData, errx := service.ListCourseCategoriesClient(ctx, moduleCode)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course categories client err (list course categories client %v)",
-			errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course categories client (module code: %s) err (list course categories client %v)",
+			moduleCode, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 

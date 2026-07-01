@@ -12,11 +12,31 @@ import (
 	dbmodel "dev.choveylee.top/elder-care-backend/internal/model/mysql"
 )
 
-func ListCourseCategoriesClient(ctx context.Context) (*data.ListCourseCategoriesClientRespData, *terror.Terror) {
-	_, courseCategoriesDB, errx := dbmodel.FindCourseCategories(ctx, dbmodel.CourseCategoryStatusNormal, -1, -1)
+func ListCourseCategoriesClient(ctx context.Context, moduleCode string) (*data.ListCourseCategoriesClientRespData, *terror.Terror) {
+	courseModuleDB, errx := dbmodel.FindCourseModuleByCode(ctx, moduleCode)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("List course categories client err (db find course categories %v)",
-			errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course categories client (module code: %s) err (db find course module %v)",
+			moduleCode, errx)
+		errx.AttachErrMsg(errMsg)
+
+		return nil, errx
+	}
+
+	if courseModuleDB == nil {
+		errMsg := tlog.E(ctx).Msgf("List course categories client (module code: %s) err (course module not exist)",
+			moduleCode)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("module code"), constant.ErrorCodeCourseModuleNotExist, errMsg)
+
+		return nil, errx
+	}
+
+	moduleId := courseModuleDB.Id
+
+	_, courseCategoriesDB, errx := dbmodel.FindCourseCategories(ctx, moduleId, dbmodel.CourseCategoryStatusNormal, -1, -1)
+	if errx != nil {
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course categories client (module code: %s, module id: %s) err (db find course categories %v)",
+			moduleCode, moduleId, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return nil, errx
@@ -29,6 +49,8 @@ func ListCourseCategoriesClient(ctx context.Context) (*data.ListCourseCategories
 	for _, courseCategoryDB := range courseCategoriesDB {
 		courseCategoryData := &data.CourseCategoryClientData{
 			CategoryId: courseCategoryDB.Id,
+
+			ModuleId: courseCategoryDB.ModuleId,
 
 			Name: courseCategoryDB.Name,
 		}

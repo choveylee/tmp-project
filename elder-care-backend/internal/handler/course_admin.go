@@ -21,6 +21,15 @@ func HandleListCourseCategoriesAdmin(c *gin.Context) {
 
 	userId := c.Request.Header.Get("user_id")
 
+	moduleCode := strings.TrimSpace(c.Query("module_code"))
+	if moduleCode == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle list course categories admin err (module code invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
 	status := -1
 
 	srcStatus := strings.TrimSpace(c.Query("status"))
@@ -100,10 +109,10 @@ func HandleListCourseCategoriesAdmin(c *gin.Context) {
 		pageSize = desPageSize
 	}
 
-	getCourseCategoriesRespData, errx := service.ListCourseCategoriesAdmin(ctx, userId, status, pageNum, pageSize)
+	getCourseCategoriesRespData, errx := service.ListCourseCategoriesAdmin(ctx, userId, moduleCode, status, pageNum, pageSize)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course categories admin (user id: %s, status: %d, page num: %d, page size: %d) err (list course categories admin %v)",
-			userId, status, pageNum, pageSize, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course categories admin (user id: %s, module code: %s, status: %d, page num: %d, page size: %d) err (list course categories admin %v)",
+			userId, moduleCode, status, pageNum, pageSize, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 
@@ -128,6 +137,15 @@ func HandleCreateCourseCategoryAdmin(c *gin.Context) {
 			string(body), err)
 
 		SendFailResponse(c, constant.ErrorCodeRequestBodyInvalid, errMsg)
+
+		return
+	}
+
+	moduleCode := strings.TrimSpace(createCourseCategoryRequest.ModuleCode)
+	if moduleCode == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course category admin err (module code invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
 
 		return
 	}
@@ -164,10 +182,10 @@ func HandleCreateCourseCategoryAdmin(c *gin.Context) {
 		return
 	}
 
-	createCourseCategoryRespData, errx := service.CreateCourseCategoryAdmin(ctx, userId, name, weight, status)
+	createCourseCategoryRespData, errx := service.CreateCourseCategoryAdmin(ctx, userId, moduleCode, name, weight, status)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle create course category admin (user id: %s, name: %s, weight: %d, status: %d) err (create course category admin %v)",
-			userId, name, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle create course category admin (user id: %s, module code: %s, name: %s, weight: %d, status: %d) err (create course category admin %v)",
+			userId, moduleCode, name, weight, status, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 
@@ -232,6 +250,15 @@ func HandleUpdateCourseCategoryAdmin(c *gin.Context) {
 		return
 	}
 
+	moduleCode := strings.TrimSpace(updateCourseCategoryRequest.ModuleCode)
+	if moduleCode == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course category admin err (module code invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
 	name := strings.TrimSpace(updateCourseCategoryRequest.Name)
 	if name == "" {
 		errMsg := tlog.E(ctx).Msgf("Handle update course category admin err (name invalid)")
@@ -264,10 +291,10 @@ func HandleUpdateCourseCategoryAdmin(c *gin.Context) {
 		return
 	}
 
-	errx := service.UpdateCourseCategoryAdmin(ctx, userId, categoryId, name, weight, status)
+	errx := service.UpdateCourseCategoryAdmin(ctx, userId, categoryId, moduleCode, name, weight, status)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle update course category admin (user id: %s, category id: %s, name: %s, weight: %d, status: %d) err (update course category admin %v)",
-			userId, categoryId, name, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle update course category admin (user id: %s, category id: %s, module code: %s, name: %s, weight: %d, status: %d) err (update course category admin %v)",
+			userId, categoryId, moduleCode, name, weight, status, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 

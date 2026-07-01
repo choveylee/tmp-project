@@ -13,11 +13,31 @@ import (
 	dbmodel "dev.choveylee.top/elder-care-backend/internal/model/mysql"
 )
 
-func ListCourseCategoriesAdmin(ctx context.Context, userId string, status int, pageNum, pageSize int) (*data.ListCourseCategoriesAdminRespData, *terror.Terror) {
-	total, courseCategoriesDB, errx := dbmodel.FindCourseCategories(ctx, status, pageNum, pageSize)
+func ListCourseCategoriesAdmin(ctx context.Context, userId string, moduleCode string, status int, pageNum, pageSize int) (*data.ListCourseCategoriesAdminRespData, *terror.Terror) {
+	courseModuleDB, errx := dbmodel.FindCourseModuleByCode(ctx, moduleCode)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("List course categories admin (user id: %s, status: %d, page num: %d, page size: %d) err (db find course categories %v)",
-			userId, status, pageNum, pageSize, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course categories admin (user id: %s, module code: %s, status: %d, page num: %d, page size: %d) err (db find course module %v)",
+			userId, moduleCode, status, pageNum, pageSize, errx)
+		errx.AttachErrMsg(errMsg)
+
+		return nil, errx
+	}
+
+	if courseModuleDB == nil {
+		errMsg := tlog.E(ctx).Msgf("List course categories admin (user id: %s, module code: %s) err (course module not exist)",
+			userId, moduleCode)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("module code"), constant.ErrorCodeCourseModuleNotExist, errMsg)
+
+		return nil, errx
+	}
+
+	moduleId := courseModuleDB.Id
+
+	total, courseCategoriesDB, errx := dbmodel.FindCourseCategories(ctx, moduleId, status, pageNum, pageSize)
+	if errx != nil {
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course categories admin (user id: %s, module code: %s, module id: %s, status: %d, page num: %d, page size: %d, module id: %s) err (db find course categories %v)",
+			userId, moduleCode, courseModuleDB.Id, status, pageNum, pageSize, moduleId, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return nil, errx
@@ -32,6 +52,8 @@ func ListCourseCategoriesAdmin(ctx context.Context, userId string, status int, p
 	for _, courseCategoryDB := range courseCategoriesDB {
 		courseCategoryData := &data.CourseCategoryAdminData{
 			CategoryId: courseCategoryDB.Id,
+
+			ModuleId: courseCategoryDB.ModuleId,
 
 			Name: courseCategoryDB.Name,
 
@@ -49,29 +71,47 @@ func ListCourseCategoriesAdmin(ctx context.Context, userId string, status int, p
 	return listCourseCategoriesRespData, nil
 }
 
-func CreateCourseCategoryAdmin(ctx context.Context, userId string, name string, weight, status int) (*data.CreateCourseCategoryAdminRespData, *terror.Terror) {
-	courseCategoryDB, errx := dbmodel.FindCourseCategoryByName(ctx, name)
+func CreateCourseCategoryAdmin(ctx context.Context, userId string, moduleCode string, name string, weight, status int) (*data.CreateCourseCategoryAdminRespData, *terror.Terror) {
+	courseModuleDB, errx := dbmodel.FindCourseModuleByCode(ctx, moduleCode)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course category admin (user id: %s, name: %s, weight: %d, status: %d) err (db find course category by name %v)",
-			userId, name, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course category admin (user id: %s, module code: %s, name: %s, weight: %d, status: %d) err (db find course module %v)",
+			userId, moduleCode, name, weight, status, errx)
+		errx.AttachErrMsg(errMsg)
+
+		return nil, errx
+	}
+
+	if courseModuleDB == nil {
+		errMsg := tlog.E(ctx).Msgf("Create course category admin (user id: %s, module code: %s, name: %s, weight: %d, status: %d) err (course module not exist)",
+			userId, moduleCode, name, weight, status)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("module code"), constant.ErrorCodeCourseModuleNotExist, errMsg)
+
+		return nil, errx
+	}
+
+	courseCategoryDB, errx := dbmodel.FindCourseCategoryByName(ctx, courseModuleDB.Id, name)
+	if errx != nil {
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course category admin (user id: %s, module code: %s, module id: %s, name: %s, weight: %d, status: %d) err (db find course category by name %v)",
+			userId, moduleCode, courseModuleDB.Id, name, weight, status, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return nil, errx
 	}
 
 	if courseCategoryDB != nil {
-		errMsg := tlog.E(ctx).Msgf("Create course category admin (user id: %s, name: %s, weight: %d, status: %d) err (name exist)",
-			userId, name, weight, status)
+		errMsg := tlog.E(ctx).Msgf("Create course category admin (user id: %s, module code: %s, module id: %s, name: %s, weight: %d, status: %d) err (name exist)",
+			userId, moduleCode, courseModuleDB.Id, name, weight, status)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("name"), constant.ErrorCodeCourseCategoryNameExist, errMsg)
 
 		return nil, errx
 	}
 
-	courseCategoryDB, errx = dbmodel.CreateCourseCategory(ctx, name, weight, status)
+	courseCategoryDB, errx = dbmodel.CreateCourseCategory(ctx, courseModuleDB.Id, name, weight, status)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course category admin (user id: %s, name: %s, weight: %d, status: %d) err (db create course category %v)",
-			userId, name, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Create course category admin (user id: %s, module code: %s, module id: %s, name: %s, weight: %d, status: %d) err (db create course category %v)",
+			userId, moduleCode, courseModuleDB.Id, name, weight, status, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return nil, errx
@@ -106,6 +146,8 @@ func GetCourseCategoryAdmin(ctx context.Context, userId string, categoryId strin
 	getCourseCategoryRespData := &data.GetCourseCategoryAdminRespData{
 		CategoryId: courseCategoryDB.Id,
 
+		ModuleId: courseCategoryDB.ModuleId,
+
 		Name: courseCategoryDB.Name,
 
 		Weight: courseCategoryDB.Weight,
@@ -119,38 +161,56 @@ func GetCourseCategoryAdmin(ctx context.Context, userId string, categoryId strin
 	return getCourseCategoryRespData, nil
 }
 
-func UpdateCourseCategoryAdmin(ctx context.Context, userId string, categoryId string, name string, weight, status int) *terror.Terror {
+func UpdateCourseCategoryAdmin(ctx context.Context, userId string, categoryId string, moduleCode string, name string, weight, status int) *terror.Terror {
 	courseCategoryDB, errx := dbmodel.FindCourseCategory(ctx, categoryId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, name: %s, weight: %d, status: %d) err (db find course category %v)",
-			userId, categoryId, name, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, name: %s, weight: %d, status: %d) err (db find course category %v)",
+			userId, categoryId, moduleCode, name, weight, status, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return errx
 	}
 
 	if courseCategoryDB == nil {
-		errMsg := tlog.E(ctx).Msgf("Update course category admin (user id: %s, category id: %s, name: %s, weight: %d, status: %d) err (course category not exist)",
-			userId, categoryId, name, weight, status)
+		errMsg := tlog.E(ctx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, name: %s, weight: %d, status: %d) err (course category not exist)",
+			userId, categoryId, moduleCode, name, weight, status)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("category id"), constant.ErrorCodeCourseCategoryNotExist, errMsg)
 
 		return errx
 	}
 
-	if courseCategoryDB.Name != name {
-		courseCategoryDB, errx := dbmodel.FindCourseCategoryByName(ctx, name)
+	courseModuleDB, errx := dbmodel.FindCourseModuleByCode(ctx, moduleCode)
+	if errx != nil {
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, name: %s, weight: %d, status: %d) err (db find course module %v)",
+			userId, categoryId, moduleCode, name, weight, status, errx)
+		errx.AttachErrMsg(errMsg)
+
+		return errx
+	}
+
+	if courseModuleDB == nil {
+		errMsg := tlog.E(ctx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, name: %s, weight: %d, status: %d) err (course module not exist)",
+			userId, categoryId, moduleCode, name, weight, status)
+
+		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("module code"), constant.ErrorCodeCourseModuleNotExist, errMsg)
+
+		return errx
+	}
+
+	if courseCategoryDB.ModuleId != courseModuleDB.Id || courseCategoryDB.Name != name {
+		courseCategoryByNameDB, errx := dbmodel.FindCourseCategoryByName(ctx, courseModuleDB.Id, name)
 		if errx != nil {
-			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, name: %s, weight: %d, status: %d) err (db find course category by name %v)",
-				userId, categoryId, name, weight, status, errx)
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, module id: %s, name: %s, weight: %d, status: %d) err (db find course category by name %v)",
+				userId, categoryId, moduleCode, courseModuleDB.Id, name, weight, status, errx)
 			errx.AttachErrMsg(errMsg)
 
 			return errx
 		}
 
-		if courseCategoryDB != nil {
-			errMsg := tlog.E(ctx).Msgf("Update course category admin (user id: %s, category id: %s, name: %s, weight: %d, status: %d) err (name exist)",
-				userId, categoryId, name, weight, status)
+		if courseCategoryByNameDB != nil && courseCategoryByNameDB.Id != categoryId {
+			errMsg := tlog.E(ctx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, module id: %s, name: %s, weight: %d, status: %d) err (name exist)",
+				userId, categoryId, moduleCode, courseModuleDB.Id, name, weight, status)
 
 			errx := terror.NewTerror(ctx, terror.ErrParamInvalid("name"), constant.ErrorCodeCourseCategoryNameExist, errMsg)
 
@@ -158,10 +218,10 @@ func UpdateCourseCategoryAdmin(ctx context.Context, userId string, categoryId st
 		}
 	}
 
-	errx = dbmodel.UpdateCourseCategory(ctx, categoryId, name, weight, status)
+	errx = dbmodel.UpdateCourseCategory(ctx, categoryId, courseModuleDB.Id, name, weight, status)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, name: %s, weight: %d, status: %d) err (db update course category %v)",
-			userId, categoryId, name, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course category admin (user id: %s, category id: %s, module code: %s, module id: %s, name: %s, weight: %d, status: %d) err (db update course category %v)",
+			userId, categoryId, moduleCode, courseModuleDB.Id, name, weight, status, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return errx
@@ -861,16 +921,16 @@ func CreateCourseCatalogAdmin(ctx context.Context, userId string, courseId strin
 func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId string, parentId string, name string, weight, status int, videoUrl string, format, language, size, duration string, uploadAt time.Time) *terror.Terror {
 	courseCatalogDB, errx := dbmodel.FindCourseCatalog(ctx, catalogId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (db find course catalog %v)",
-			userId, catalogId, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db find course catalog %v)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return errx
 	}
 
 	if courseCatalogDB == nil {
-		errMsg := tlog.E(ctx).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (course catalog not exist)",
-			userId, catalogId)
+		errMsg := tlog.E(ctx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (course catalog not exist)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("catalog id"), constant.ErrorCodeCourseCatalogNotExist, errMsg)
 
@@ -878,8 +938,8 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 	}
 
 	if parentId == catalogId {
-		errMsg := tlog.E(ctx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s) err (parent id invalid)",
-			userId, catalogId, parentId)
+		errMsg := tlog.E(ctx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (parent id invalid)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("parent id"), constant.ErrorCodeRequestParamInvalid, errMsg)
 
@@ -889,16 +949,16 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 	if parentId != "" && parentId != courseCatalogDB.ParentId {
 		parentCatalogDB, errx := dbmodel.FindCourseCatalog(ctx, parentId)
 		if errx != nil {
-			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s) err (db find parent catalog %v)",
-				userId, catalogId, parentId, errx)
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db find parent catalog %v)",
+				userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 			errx.AttachErrMsg(errMsg)
 
 			return errx
 		}
 
 		if parentCatalogDB == nil || parentCatalogDB.CourseId != courseCatalogDB.CourseId {
-			errMsg := tlog.E(ctx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s) err (parent catalog not exist)",
-				userId, catalogId, parentId)
+			errMsg := tlog.E(ctx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (parent catalog not exist)",
+				userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt)
 
 			errx := terror.NewTerror(ctx, terror.ErrParamInvalid("parent id"), constant.ErrorCodeCourseCatalogNotExist, errMsg)
 
@@ -908,8 +968,8 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 
 	courseVideoDB, errx := dbmodel.FindCourseVideoByCatalog(ctx, catalogId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (db find course video by catalog %v)",
-			userId, catalogId, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db find course video by catalog %v)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return errx
@@ -918,8 +978,8 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 	err := dbmodel.DB(ctx).Transaction(func(tx *gorm.DB) error {
 		errx := dbmodel.UpdateCourseCatalog(ctx, tx, catalogId, parentId, name, weight, status)
 		if errx != nil {
-			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d) err (db update course catalog %v)",
-				userId, catalogId, parentId, name, weight, status, errx)
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db update course catalog %v)",
+				userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 			errx.AttachErrMsg(errMsg)
 
 			return errx
@@ -928,8 +988,8 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 		if courseVideoDB == nil {
 			_, errx = dbmodel.CreateCourseVideo(ctx, tx, catalogId, videoUrl, format, language, size, duration, uploadAt)
 			if errx != nil {
-				errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (db create course video %v)",
-					userId, catalogId, errx)
+				errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db create course video %v)",
+					userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, errx)
 				errx.AttachErrMsg(errMsg)
 
 				return errx
@@ -942,8 +1002,8 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 
 		errx = dbmodel.UpdateCourseVideo(ctx, tx, videoId, videoUrl, format, language, size, duration, uploadAt)
 		if errx != nil {
-			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, video id: %s) err (db update course video %v)",
-				userId, catalogId, courseVideoDB.Id, errx)
+			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db update course video %v)",
+				userId, catalogId, parentId, name, weight, status, courseVideoDB.Id, videoUrl, format, language, size, duration, uploadAt, errx)
 			errx.AttachErrMsg(errMsg)
 
 			return errx
@@ -952,8 +1012,8 @@ func UpdateCourseCatalogAdmin(ctx context.Context, userId string, catalogId stri
 		return nil
 	})
 	if err != nil {
-		errMsg := tlog.E(ctx).Err(err).Msgf("Update course catalog admin (user id: %s, catalog id: %s) err (db transaction %v)",
-			userId, catalogId, err)
+		errMsg := tlog.E(ctx).Err(err).Msgf("Update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %s) err (db transaction %v)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, err)
 
 		errx := terror.NewTerror(ctx, terror.ErrSvcAbnormal("db transaction"), constant.ErrorCodeMysqlServerAbnormal, errMsg)
 

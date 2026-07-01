@@ -63,6 +63,7 @@ var (
 	ErrorCodeCourseCategoryNameExist = register(200131, "课程分类名称已存在")
 	ErrorCodeCourseCategoryNotExist  = register(200132, "课程分类不存在")
 	ErrorCodeCourseCategoryInUse     = register(200133, "课程分类正在使用中")
+	ErrorCodeCourseModuleNotExist    = register(200134, "课程模块不存在")
 
 	ErrorCodeCourseNotExist       = register(200211, "课程不存在")
 	ErrorCodeCourseInvalid        = register(200212, "课程无效")
@@ -118,7 +119,7 @@ func StatusCode(errCode int) int {
 	case ErrorCodeArticleNotExist:
 		return http.StatusBadRequest
 
-	case ErrorCodeCourseCategoryNameExist, ErrorCodeCourseCategoryNotExist, ErrorCodeCourseCategoryInUse:
+	case ErrorCodeCourseCategoryNameExist, ErrorCodeCourseCategoryNotExist, ErrorCodeCourseCategoryInUse, ErrorCodeCourseModuleNotExist:
 		return http.StatusBadRequest
 
 	case ErrorCodeCourseNotExist, ErrorCodeCourseInvalid, ErrorCodeCourseTypeInvalid, ErrorCodeCourseDetailNotExist:
