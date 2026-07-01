@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS courses
     course_type     INT           NOT NULL COMMENT '课程类型 0-视频，1-图文',
     cover_url       VARCHAR(1024) NOT NULL COMMENT '封面URL',
     link_url        VARCHAR(1024) NOT NULL COMMENT '链接URL',
-    publish_at      DATETIME      NULL     COMMENT '发布时间',
+    publish_at      DATETIME      NULL COMMENT '发布时间',
     favourite_count INT           NOT NULL COMMENT '收藏数',
     view_count      INT           NOT NULL COMMENT '浏览数',
     status          INT           NOT NULL COMMENT '状态：1-正常，0-禁用',
@@ -64,10 +64,24 @@ CREATE TABLE IF NOT EXISTS course_details
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci COMMENT ='课程详情';
 
+CREATE TABLE IF NOT EXISTS course_catalogs
+(
+    id         VARCHAR(24)   NOT NULL,
+    parent_id  VARCHAR(24)   NOT NULL COMMENT '父级目录ID',
+    name       VARCHAR(1024) NOT NULL COMMENT '名称',
+    weight     INT           NOT NULL COMMENT '权重',
+    status     INT           NOT NULL COMMENT '状态：1-正常，0-禁用',
+    created_at DATETIME      NOT NULL,
+    updated_at DATETIME      NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='课程目录';
+
 CREATE TABLE IF NOT EXISTS course_videos
 (
     id         VARCHAR(24)   NOT NULL,
-    course_id  VARCHAR(24)   NOT NULL COMMENT '课程ID',
+    catalog_id VARCHAR(24)   NOT NULL COMMENT '目录ID',
     video_url  VARCHAR(1024) NOT NULL COMMENT '视频URL',
     format     VARCHAR(255)  NOT NULL COMMENT '格式',
     language   VARCHAR(255)  NOT NULL COMMENT '语言',

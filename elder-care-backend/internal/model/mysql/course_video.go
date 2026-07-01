@@ -35,7 +35,7 @@ var (
 type CourseVideo struct {
 	Id string
 
-	CourseId string
+	CatalogId string
 
 	VideoUrl string
 
@@ -54,11 +54,11 @@ type CourseVideo struct {
 	DeletedAt gorm.DeletedAt
 }
 
-func CreateCourseVideo(ctx context.Context, courseId string, videoUrl string, format, language, size, duration string, uploadAt time.Time, weight, status int) (*CourseVideo, *terror.Terror) {
+func CreateCourseVideo(ctx context.Context, catalogId string, videoUrl string, format, language, size, duration string, uploadAt time.Time, weight, status int) (*CourseVideo, *terror.Terror) {
 	courseVideoDB := &CourseVideo{
 		Id: tutil.NewOid().String(),
 
-		CourseId: courseId,
+		CatalogId: catalogId,
 
 		VideoUrl: videoUrl,
 
@@ -76,7 +76,7 @@ func CreateCourseVideo(ctx context.Context, courseId string, videoUrl string, fo
 	retGorm := serverClient.DB(ctx, runMode).Create(courseVideoDB)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Create course video (course id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, weight: %d, status: %d) err (db create %v)",
-			courseId, videoUrl, format, language, size, duration, uploadAt, weight, status, retGorm.Error)
+			catalogId, videoUrl, format, language, size, duration, uploadAt, weight, status, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 

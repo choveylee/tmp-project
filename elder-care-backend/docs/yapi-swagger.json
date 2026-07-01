@@ -1,0 +1,1231 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "elder-care-backend API",
+    "description": "YApi import document generated from Go router, handler and data structs. Public APIs use /api/v1/public. Admin APIs use /api/v1/admin and require Authorization: Bearer <access_token> unless noted.",
+    "version": "1.0.0"
+  },
+  "basePath": "/",
+  "schemes": ["http", "https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "description": "Bearer <access_token>"
+    }
+  },
+  "tags": [
+    { "name": "Health", "description": "健康检查" },
+    { "name": "Public Common", "description": "公开端通用接口" },
+    { "name": "Public Banner", "description": "公开端轮播图接口" },
+    { "name": "Public Article", "description": "公开端文章接口" },
+    { "name": "Public Course", "description": "公开端课程接口" },
+    { "name": "Admin Session", "description": "管理端登录接口" },
+    { "name": "Admin Common", "description": "管理端通用接口" },
+    { "name": "Admin User", "description": "管理端用户接口" },
+    { "name": "Admin Banner", "description": "管理端轮播图接口" },
+    { "name": "Admin Article", "description": "管理端文章接口" },
+    { "name": "Admin Course", "description": "管理端课程接口" }
+  ],
+  "paths": {
+    "/cpu-check": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "CPU健康检查",
+        "responses": {
+          "200": { "description": "OK", "schema": { "$ref": "#/definitions/CpuCheckResponse" } }
+        }
+      }
+    },
+    "/ram-check": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "内存健康检查",
+        "responses": {
+          "200": { "description": "OK", "schema": { "$ref": "#/definitions/RamCheckResponse" } }
+        }
+      }
+    },
+    "/api/v1/public/captcha": {
+      "post": {
+        "tags": ["Public Common"],
+        "summary": "创建验证码",
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCaptchaEnvelope" } },
+          "500": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/public/banners": {
+      "get": {
+        "tags": ["Public Banner"],
+        "summary": "公开端轮播图列表",
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListBannersClientEnvelope" } }
+        }
+      }
+    },
+    "/api/v1/public/articles/categories": {
+      "get": {
+        "tags": ["Public Article"],
+        "summary": "公开端文章分类列表",
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListArticleCategoriesClientEnvelope" } }
+        }
+      }
+    },
+    "/api/v1/public/articles": {
+      "get": {
+        "tags": ["Public Article"],
+        "summary": "公开端文章列表",
+        "parameters": [
+          { "$ref": "#/parameters/RequiredCategoryIdQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListArticlesClientEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/public/articles/{id}": {
+      "get": {
+        "tags": ["Public Article"],
+        "summary": "公开端文章详情",
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetArticleClientEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/public/courses/categories": {
+      "get": {
+        "tags": ["Public Course"],
+        "summary": "公开端课程分类列表",
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseCategoriesClientEnvelope" } }
+        }
+      }
+    },
+    "/api/v1/public/courses": {
+      "get": {
+        "tags": ["Public Course"],
+        "summary": "公开端课程列表",
+        "parameters": [
+          { "$ref": "#/parameters/RequiredCategoryIdQuery" },
+          { "$ref": "#/parameters/CourseTypeQuery" },
+          { "$ref": "#/parameters/SortByQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCoursesClientEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/public/courses/{id}": {
+      "get": {
+        "tags": ["Public Course"],
+        "summary": "公开端课程详情",
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetCourseClientEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/public/courses/{id}/videos": {
+      "get": {
+        "tags": ["Public Course"],
+        "summary": "公开端课程视频列表",
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseVideosClientEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/captcha": {
+      "post": {
+        "tags": ["Admin Common"],
+        "summary": "管理端创建验证码",
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCaptchaEnvelope" } }
+        }
+      }
+    },
+    "/api/v1/admin/sessions": {
+      "post": {
+        "tags": ["Admin Session"],
+        "summary": "管理端登录",
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateSessionAdminRequest" } }],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateSessionAdminEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" },
+          "500": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/image": {
+      "post": {
+        "tags": ["Admin Common"],
+        "summary": "上传图片",
+        "consumes": ["multipart/form-data"],
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "file", "in": "formData", "required": true, "type": "file", "description": "图片文件，后缀支持 .img/.png/.jpg/.jpeg" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateImageAdminEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/users": {
+      "get": {
+        "tags": ["Admin User"],
+        "summary": "用户列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "name": "role_id", "in": "query", "type": "string", "required": false, "description": "角色ID" },
+          { "$ref": "#/parameters/UserStatusQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListUsersAdminEnvelope" } }
+        }
+      },
+      "post": {
+        "tags": ["Admin User"],
+        "summary": "创建用户",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateUserAdminRequest" } }],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateUserAdminEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}": {
+      "put": {
+        "tags": ["Admin User"],
+        "summary": "编辑用户",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateUserAdminRequest" } }
+        ],
+        "responses": {
+          "200": { "$ref": "#/responses/EmptySuccessResponse" },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/users/{id}/password": {
+      "put": {
+        "tags": ["Admin User"],
+        "summary": "重置用户密码",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateUserPasswordAdminRequest" } }
+        ],
+        "responses": {
+          "200": { "$ref": "#/responses/EmptySuccessResponse" },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/users/password": {
+      "put": {
+        "tags": ["Admin User"],
+        "summary": "修改当前登录用户密码",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateOwnPasswordAdminRequest" } }],
+        "responses": {
+          "200": { "$ref": "#/responses/EmptySuccessResponse" },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/banners": {
+      "get": {
+        "tags": ["Admin Banner"],
+        "summary": "轮播图列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/NormalDisabledStatusQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListBannersAdminEnvelope" } } }
+      },
+      "post": {
+        "tags": ["Admin Banner"],
+        "summary": "创建轮播图",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateBannerAdminRequest" } }],
+        "responses": {
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateBannerAdminEnvelope" } },
+          "400": { "$ref": "#/responses/ErrorResponse" }
+        }
+      }
+    },
+    "/api/v1/admin/banners/{id}": {
+      "get": {
+        "tags": ["Admin Banner"],
+        "summary": "轮播图详情",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetBannerAdminEnvelope" } } }
+      },
+      "put": {
+        "tags": ["Admin Banner"],
+        "summary": "编辑轮播图",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateBannerAdminRequest" } }
+        ],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" }, "400": { "$ref": "#/responses/ErrorResponse" } }
+      },
+      "delete": {
+        "tags": ["Admin Banner"],
+        "summary": "删除轮播图",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" }, "400": { "$ref": "#/responses/ErrorResponse" } }
+      }
+    },
+    "/api/v1/admin/articles/categories": {
+      "get": {
+        "tags": ["Admin Article"],
+        "summary": "文章分类列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/NormalDisabledStatusQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListArticleCategoriesAdminEnvelope" } } }
+      },
+      "post": {
+        "tags": ["Admin Article"],
+        "summary": "创建文章分类",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateArticleCategoryAdminRequest" } }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateArticleCategoryAdminEnvelope" } } }
+      }
+    },
+    "/api/v1/admin/articles/categories/{id}": {
+      "get": {
+        "tags": ["Admin Article"],
+        "summary": "文章分类详情",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetArticleCategoryAdminEnvelope" } } }
+      },
+      "put": {
+        "tags": ["Admin Article"],
+        "summary": "编辑文章分类",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateArticleCategoryAdminRequest" } }
+        ],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      },
+      "delete": {
+        "tags": ["Admin Article"],
+        "summary": "删除文章分类",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      }
+    },
+    "/api/v1/admin/articles": {
+      "get": {
+        "tags": ["Admin Article"],
+        "summary": "文章列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/OptionalCategoryIdQuery" },
+          { "$ref": "#/parameters/NormalDisabledStatusQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListArticlesAdminEnvelope" } } }
+      },
+      "post": {
+        "tags": ["Admin Article"],
+        "summary": "创建文章",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateArticleAdminRequest" } }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateArticleAdminEnvelope" } } }
+      }
+    },
+    "/api/v1/admin/articles/{id}": {
+      "get": {
+        "tags": ["Admin Article"],
+        "summary": "文章详情",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetArticleAdminEnvelope" } } }
+      },
+      "put": {
+        "tags": ["Admin Article"],
+        "summary": "编辑文章",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateArticleAdminRequest" } }
+        ],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      },
+      "delete": {
+        "tags": ["Admin Article"],
+        "summary": "删除文章",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      }
+    },
+    "/api/v1/admin/courses/categories": {
+      "get": {
+        "tags": ["Admin Course"],
+        "summary": "课程分类列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/NormalDisabledStatusQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseCategoriesAdminEnvelope" } } }
+      },
+      "post": {
+        "tags": ["Admin Course"],
+        "summary": "创建课程分类",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateCourseCategoryAdminRequest" } }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCourseCategoryAdminEnvelope" } } }
+      }
+    },
+    "/api/v1/admin/courses/categories/{id}": {
+      "get": {
+        "tags": ["Admin Course"],
+        "summary": "课程分类详情",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetCourseCategoryAdminEnvelope" } } }
+      },
+      "put": {
+        "tags": ["Admin Course"],
+        "summary": "编辑课程分类",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateCourseCategoryAdminRequest" } }
+        ],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      },
+      "delete": {
+        "tags": ["Admin Course"],
+        "summary": "删除课程分类",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      }
+    },
+    "/api/v1/admin/courses": {
+      "get": {
+        "tags": ["Admin Course"],
+        "summary": "课程列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/OptionalCategoryIdQuery" },
+          { "$ref": "#/parameters/CourseTypeQuery" },
+          { "$ref": "#/parameters/CourseStatusQuery" },
+          { "$ref": "#/parameters/PageNumQuery" },
+          { "$ref": "#/parameters/PageSizeQuery" }
+        ],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCoursesAdminEnvelope" } } }
+      },
+      "post": {
+        "tags": ["Admin Course"],
+        "summary": "创建课程",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateCourseAdminRequest" } }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCourseAdminEnvelope" } } }
+      }
+    },
+    "/api/v1/admin/courses/{id}": {
+      "get": {
+        "tags": ["Admin Course"],
+        "summary": "课程详情",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/GetCourseAdminEnvelope" } } }
+      },
+      "put": {
+        "tags": ["Admin Course"],
+        "summary": "编辑课程",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateCourseAdminRequest" } }
+        ],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      },
+      "delete": {
+        "tags": ["Admin Course"],
+        "summary": "删除课程",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      }
+    },
+    "/api/v1/admin/courses/{id}/videos": {
+      "get": {
+        "tags": ["Admin Course"],
+        "summary": "课程视频列表",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseVideosAdminEnvelope" } } }
+      },
+      "post": {
+        "tags": ["Admin Course"],
+        "summary": "创建课程视频",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateCourseVideoAdminRequest" } }
+        ],
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCourseVideoAdminEnvelope" } } }
+      }
+    },
+    "/api/v1/admin/courses/videos/{id}": {
+      "put": {
+        "tags": ["Admin Course"],
+        "summary": "编辑课程视频",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/parameters/IdPath" },
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateCourseVideoAdminRequest" } }
+        ],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      },
+      "delete": {
+        "tags": ["Admin Course"],
+        "summary": "删除课程视频",
+        "security": [{ "BearerAuth": [] }],
+        "parameters": [{ "$ref": "#/parameters/IdPath" }],
+        "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
+      }
+    }
+  },
+  "parameters": {
+    "IdPath": { "name": "id", "in": "path", "type": "string", "required": true, "description": "资源ID" },
+    "RequiredCategoryIdQuery": { "name": "category_id", "in": "query", "type": "string", "required": true, "description": "分类ID" },
+    "OptionalCategoryIdQuery": { "name": "category_id", "in": "query", "type": "string", "required": false, "description": "分类ID" },
+    "PageNumQuery": { "name": "page_num", "in": "query", "type": "integer", "required": false, "default": 1, "minimum": 1, "maximum": 100, "description": "页码" },
+    "PageSizeQuery": { "name": "page_size", "in": "query", "type": "integer", "required": false, "default": 10, "minimum": 1, "maximum": 100, "description": "每页数量" },
+    "NormalDisabledStatusQuery": { "name": "status", "in": "query", "type": "integer", "required": false, "enum": [0, 1], "description": "状态。多数内容接口：1正常，0禁用；不传为全部" },
+    "UserStatusQuery": { "name": "status", "in": "query", "type": "integer", "required": false, "enum": [0, 1], "description": "用户状态；不传为全部" },
+    "CourseStatusQuery": { "name": "status", "in": "query", "type": "integer", "required": false, "enum": [0, 1], "description": "课程状态：0正常，1禁用；不传为全部" },
+    "CourseTypeQuery": { "name": "course_type", "in": "query", "type": "integer", "required": false, "enum": [0, 1], "description": "课程类型：0普通课程，1视频课程" },
+    "SortByQuery": { "name": "sort_by", "in": "query", "type": "string", "required": false, "enum": ["publish", "view", "favourite"], "default": "publish", "description": "排序方式" }
+  },
+  "responses": {
+    "EmptySuccessResponse": {
+      "description": "成功",
+      "schema": { "$ref": "#/definitions/EmptySuccessEnvelope" }
+    },
+    "ErrorResponse": {
+      "description": "失败",
+      "schema": { "$ref": "#/definitions/ErrorEnvelope" }
+    }
+  },
+  "definitions": {
+    "ResponseEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "description": "业务状态码，0表示成功" },
+        "message": { "type": "string", "description": "错误消息，成功时通常为空" },
+        "detail": { "type": "string", "description": "错误详情" },
+        "data": { "type": "object", "description": "响应数据" },
+        "ex_data": { "type": "object", "description": "扩展响应数据" }
+      },
+      "required": ["code"]
+    },
+    "EmptySuccessEnvelope": {
+      "allOf": [{ "$ref": "#/definitions/ResponseEnvelope" }],
+      "example": { "code": 0 }
+    },
+    "ErrorEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 100022 },
+        "message": { "type": "string", "example": "请求参数非法" },
+        "detail": { "type": "string", "example": "request parameter invalid" }
+      },
+      "required": ["code", "message"]
+    },
+    "CreateCaptchaEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/CreateCaptchaClientRespData" }
+      }
+    },
+    "CreateCaptchaClientRespData": {
+      "type": "object",
+      "properties": {
+        "captcha_id": { "type": "string" },
+        "captcha_img": { "type": "string", "description": "base64图片内容" }
+      }
+    },
+    "CreateSessionAdminRequest": {
+      "type": "object",
+      "required": ["mobile", "password", "captcha_id", "captcha_code"],
+      "properties": {
+        "mobile": { "type": "string", "description": "手机号" },
+        "password": { "type": "string", "description": "密码" },
+        "captcha_id": { "type": "string", "description": "验证码ID" },
+        "captcha_code": { "type": "string", "description": "验证码" }
+      }
+    },
+    "CreateSessionAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/CreateSessionAdminRespData" }
+      }
+    },
+    "CreateSessionAdminRespData": {
+      "type": "object",
+      "properties": {
+        "access_token": { "type": "string" },
+        "expires_in": { "type": "integer", "description": "过期秒数" }
+      }
+    },
+    "CreateImageAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/CreateImageAdminRespData" }
+      }
+    },
+    "CreateImageAdminRespData": {
+      "type": "object",
+      "properties": {
+        "file_key": { "type": "string" },
+        "file_url": { "type": "string" }
+      }
+    },
+    "CpuCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "detail": { "type": "string" }
+      }
+    },
+    "RamCheckResponse": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string" },
+        "detail": { "type": "string" }
+      }
+    },
+    "BannerClientData": {
+      "type": "object",
+      "properties": {
+        "banner_id": { "type": "string" },
+        "title": { "type": "string" },
+        "abstract": { "type": "string" },
+        "image_url": { "type": "string" },
+        "link_url": { "type": "string" }
+      }
+    },
+    "ListBannersClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "banners": { "type": "array", "items": { "$ref": "#/definitions/BannerClientData" } }
+          }
+        }
+      }
+    },
+    "BannerAdminData": {
+      "allOf": [
+        { "$ref": "#/definitions/BannerClientData" },
+        {
+          "type": "object",
+          "properties": {
+            "weight": { "type": "integer" },
+            "status": { "type": "integer" },
+            "created_at": { "type": "string" },
+            "updated_at": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "CreateBannerAdminRequest": {
+      "type": "object",
+      "required": ["title", "image_url", "status"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 50 },
+        "abstract": { "type": "string", "maxLength": 100 },
+        "image_url": { "type": "string", "maxLength": 1024 },
+        "link_url": { "type": "string", "maxLength": 1024 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
+      }
+    },
+    "UpdateBannerAdminRequest": { "$ref": "#/definitions/CreateBannerAdminRequest" },
+    "ListBannersAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "banners": { "type": "array", "items": { "$ref": "#/definitions/BannerAdminData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "CreateBannerAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "banner_id": { "type": "string" } } }
+      }
+    },
+    "GetBannerAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/BannerAdminData" }
+      }
+    },
+    "ArticleCategoryClientData": {
+      "type": "object",
+      "properties": {
+        "category_id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "ArticleCategoryAdminData": {
+      "type": "object",
+      "properties": {
+        "category_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 64 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      }
+    },
+    "ListArticleCategoriesClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "categories": { "type": "array", "items": { "$ref": "#/definitions/ArticleCategoryClientData" } } } }
+      }
+    },
+    "CreateArticleCategoryAdminRequest": {
+      "type": "object",
+      "required": ["name", "status"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 64 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
+      }
+    },
+    "UpdateArticleCategoryAdminRequest": { "$ref": "#/definitions/CreateArticleCategoryAdminRequest" },
+    "ListArticleCategoriesAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "categories": { "type": "array", "items": { "$ref": "#/definitions/ArticleCategoryAdminData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "CreateArticleCategoryAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "category_id": { "type": "string" } } }
+      }
+    },
+    "GetArticleCategoryAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/ArticleCategoryAdminData" }
+      }
+    },
+    "ArticleClientData": {
+      "type": "object",
+      "properties": {
+        "article_id": { "type": "string" },
+        "title": { "type": "string" },
+        "abstract": { "type": "string" },
+        "content": { "type": "string" },
+        "cover_url": { "type": "string" },
+        "link_url": { "type": "string" },
+        "publish_at": { "type": "string", "description": "RFC3339格式" }
+      }
+    },
+    "ArticleAdminData": {
+      "allOf": [
+        { "$ref": "#/definitions/ArticleClientData" },
+        {
+          "type": "object",
+          "properties": {
+            "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" },
+            "created_at": { "type": "string" },
+            "updated_at": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "ListArticlesClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "articles": { "type": "array", "items": { "$ref": "#/definitions/ArticleClientData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "GetArticleClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/ArticleClientData" }
+      }
+    },
+    "CreateArticleAdminRequest": {
+      "type": "object",
+      "required": ["category_id", "title", "content", "status"],
+      "properties": {
+        "category_id": { "type": "string" },
+        "title": { "type": "string", "maxLength": 1024 },
+        "abstract": { "type": "string", "maxLength": 1024 },
+        "content": { "type": "string", "maxLength": 65535 },
+        "cover_url": { "type": "string", "maxLength": 1024 },
+        "link_url": { "type": "string", "maxLength": 1024 },
+        "publish_at": { "type": "string", "description": "RFC3339格式；不传默认为当前时间" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
+      }
+    },
+    "UpdateArticleAdminRequest": {
+      "type": "object",
+      "required": ["title", "content", "status"],
+      "properties": {
+        "title": { "type": "string", "maxLength": 1024 },
+        "abstract": { "type": "string", "maxLength": 1024 },
+        "content": { "type": "string", "maxLength": 65535 },
+        "cover_url": { "type": "string", "maxLength": 1024 },
+        "link_url": { "type": "string", "maxLength": 1024 },
+        "publish_at": { "type": "string", "description": "RFC3339格式；不传默认为当前时间" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
+      }
+    },
+    "ListArticlesAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "articles": { "type": "array", "items": { "$ref": "#/definitions/ArticleAdminData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "CreateArticleAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "article_id": { "type": "string" } } }
+      }
+    },
+    "GetArticleAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/ArticleAdminData" }
+      }
+    },
+    "CourseCategoryClientData": {
+      "type": "object",
+      "properties": {
+        "category_id": { "type": "string" },
+        "name": { "type": "string" }
+      }
+    },
+    "CourseCategoryAdminData": {
+      "type": "object",
+      "properties": {
+        "category_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 64 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      }
+    },
+    "ListCourseCategoriesClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "categories": { "type": "array", "items": { "$ref": "#/definitions/CourseCategoryClientData" } } } }
+      }
+    },
+    "CreateCourseCategoryAdminRequest": {
+      "type": "object",
+      "required": ["name", "status"],
+      "properties": {
+        "name": { "type": "string", "maxLength": 64 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "1正常，0禁用" }
+      }
+    },
+    "UpdateCourseCategoryAdminRequest": { "$ref": "#/definitions/CreateCourseCategoryAdminRequest" },
+    "ListCourseCategoriesAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "categories": { "type": "array", "items": { "$ref": "#/definitions/CourseCategoryAdminData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "CreateCourseCategoryAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "category_id": { "type": "string" } } }
+      }
+    },
+    "GetCourseCategoryAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/CourseCategoryAdminData" }
+      }
+    },
+    "CourseClientData": {
+      "type": "object",
+      "properties": {
+        "course_id": { "type": "string" },
+        "title": { "type": "string" },
+        "abstract": { "type": "string" },
+        "cover_url": { "type": "string" },
+        "link_url": { "type": "string" },
+        "publish_at": { "type": "string" }
+      }
+    },
+    "CourseAdminData": {
+      "allOf": [
+        { "$ref": "#/definitions/CourseClientData" },
+        {
+          "type": "object",
+          "properties": {
+            "category_id": { "type": "string" },
+            "category_name": { "type": "string" },
+            "course_type": { "type": "integer", "enum": [0, 1], "description": "0普通课程，1视频课程" },
+            "author": { "type": "string" },
+            "source": { "type": "string" },
+            "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" },
+            "created_at": { "type": "string" },
+            "updated_at": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "GetCourseClientRespData": {
+      "type": "object",
+      "properties": {
+        "course_id": { "type": "string" },
+        "author": { "type": "string" },
+        "source": { "type": "string" },
+        "title": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "abstract": { "type": "string" },
+        "cover_url": { "type": "string" },
+        "link_url": { "type": "string" },
+        "detail": { "type": "string" },
+        "summary": { "type": "string" },
+        "objective": { "type": "string" },
+        "outline": { "type": "string" },
+        "references": { "type": "string" },
+        "favourite_count": { "type": "integer" },
+        "view_count": { "type": "integer" },
+        "publish_at": { "type": "string" }
+      }
+    },
+    "GetCourseAdminRespData": {
+      "allOf": [
+        { "$ref": "#/definitions/GetCourseClientRespData" },
+        {
+          "type": "object",
+          "properties": {
+            "category_id": { "type": "string" },
+            "category_name": { "type": "string" },
+            "course_type": { "type": "integer", "enum": [0, 1] },
+            "created_at": { "type": "string" },
+            "updated_at": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "ListCoursesClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "courses": { "type": "array", "items": { "$ref": "#/definitions/CourseClientData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "GetCourseClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/GetCourseClientRespData" }
+      }
+    },
+    "CreateCourseAdminRequest": {
+      "type": "object",
+      "required": ["title", "course_type", "status"],
+      "properties": {
+        "category_id": { "type": "string" },
+        "course_type": { "type": "integer", "enum": [0, 1], "description": "0普通课程，1视频课程" },
+        "author": { "type": "string", "maxLength": 1024 },
+        "source": { "type": "string", "maxLength": 1024 },
+        "title": { "type": "string", "maxLength": 1024 },
+        "tags": { "type": "array", "items": { "type": "string", "maxLength": 64 }, "description": "不可为空、不可重复" },
+        "abstract": { "type": "string", "maxLength": 1024 },
+        "cover_url": { "type": "string", "maxLength": 1024 },
+        "link_url": { "type": "string", "maxLength": 1024 },
+        "detail": { "type": "string" },
+        "summary": { "type": "string" },
+        "objective": { "type": "string" },
+        "outline": { "type": "string" },
+        "references": { "type": "string" },
+        "publish_at": { "type": "string", "description": "RFC3339格式；可为空" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" }
+      }
+    },
+    "UpdateCourseAdminRequest": {
+      "type": "object",
+      "required": ["title", "status"],
+      "properties": {
+        "category_id": { "type": "string" },
+        "author": { "type": "string", "maxLength": 1024 },
+        "source": { "type": "string", "maxLength": 1024 },
+        "title": { "type": "string", "maxLength": 1024 },
+        "tags": { "type": "array", "items": { "type": "string", "maxLength": 64 }, "description": "不可为空、不可重复" },
+        "abstract": { "type": "string", "maxLength": 1024 },
+        "cover_url": { "type": "string", "maxLength": 1024 },
+        "link_url": { "type": "string", "maxLength": 1024 },
+        "detail": { "type": "string" },
+        "summary": { "type": "string" },
+        "objective": { "type": "string" },
+        "outline": { "type": "string" },
+        "references": { "type": "string" },
+        "publish_at": { "type": "string", "description": "RFC3339格式；可为空" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" }
+      }
+    },
+    "ListCoursesAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "courses": { "type": "array", "items": { "$ref": "#/definitions/CourseAdminData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "CreateCourseAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "course_id": { "type": "string" } } }
+      }
+    },
+    "GetCourseAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "$ref": "#/definitions/GetCourseAdminRespData" }
+      }
+    },
+    "CourseVideoClientData": {
+      "type": "object",
+      "properties": {
+        "video_id": { "type": "string" },
+        "video_url": { "type": "string" },
+        "format": { "type": "string" },
+        "language": { "type": "string" },
+        "size": { "type": "string" },
+        "duration": { "type": "string" },
+        "upload_at": { "type": "string" }
+      }
+    },
+    "CourseVideoAdminData": {
+      "allOf": [
+        { "$ref": "#/definitions/CourseVideoClientData" },
+        {
+          "type": "object",
+          "properties": {
+            "created_at": { "type": "string" },
+            "updated_at": { "type": "string" }
+          }
+        }
+      ]
+    },
+    "ListCourseVideosClientEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "videos": { "type": "array", "items": { "$ref": "#/definitions/CourseVideoClientData" } } } }
+      }
+    },
+    "ListCourseVideosAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "videos": { "type": "array", "items": { "$ref": "#/definitions/CourseVideoAdminData" } } } }
+      }
+    },
+    "CreateCourseVideoAdminRequest": {
+      "type": "object",
+      "required": ["video_url", "format", "language", "size", "duration", "upload_at", "status"],
+      "properties": {
+        "video_url": { "type": "string", "maxLength": 1024 },
+        "format": { "type": "string", "maxLength": 32 },
+        "language": { "type": "string", "maxLength": 32 },
+        "size": { "type": "string", "maxLength": 32 },
+        "duration": { "type": "string", "maxLength": 32 },
+        "upload_at": { "type": "string", "description": "RFC3339格式" },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" }
+      }
+    },
+    "UpdateCourseVideoAdminRequest": { "$ref": "#/definitions/CreateCourseVideoAdminRequest" },
+    "CreateCourseVideoAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "video_id": { "type": "string" } } }
+      }
+    },
+    "UserAdminData": {
+      "type": "object",
+      "properties": {
+        "user_id": { "type": "string" },
+        "role_id": { "type": "string" },
+        "role_name": { "type": "string" },
+        "name": { "type": "string" },
+        "mobile": { "type": "string" },
+        "status": { "type": "integer" },
+        "login_at": { "type": "string" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      }
+    },
+    "ListUsersAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": {
+          "type": "object",
+          "properties": {
+            "list": { "type": "array", "items": { "$ref": "#/definitions/UserAdminData" } },
+            "total": { "type": "integer", "format": "int64" }
+          }
+        }
+      }
+    },
+    "CreateUserAdminRequest": {
+      "type": "object",
+      "required": ["role_id", "name", "mobile", "password", "status"],
+      "properties": {
+        "role_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 64 },
+        "mobile": { "type": "string", "description": "中国大陆手机号" },
+        "password": { "type": "string", "maxLength": 255 },
+        "status": { "type": "integer", "enum": [0, 1] }
+      }
+    },
+    "CreateUserAdminEnvelope": {
+      "type": "object",
+      "properties": {
+        "code": { "type": "integer", "example": 0 },
+        "data": { "type": "object", "properties": { "user_id": { "type": "string" } } }
+      }
+    },
+    "UpdateUserAdminRequest": {
+      "type": "object",
+      "required": ["role_id", "name", "mobile", "status"],
+      "properties": {
+        "role_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 64 },
+        "mobile": { "type": "string", "description": "中国大陆手机号" },
+        "status": { "type": "integer", "enum": [0, 1] }
+      }
+    },
+    "UpdateUserPasswordAdminRequest": {
+      "type": "object",
+      "required": ["password"],
+      "properties": {
+        "password": { "type": "string", "maxLength": 255 }
+      }
+    },
+    "UpdateOwnPasswordAdminRequest": {
+      "type": "object",
+      "required": ["old_password", "new_password"],
+      "properties": {
+        "old_password": { "type": "string" },
+        "new_password": { "type": "string", "maxLength": 255 }
+      }
+    }
+  }
+}
