@@ -174,21 +174,21 @@ func HandleGetCourseClient(c *gin.Context) {
 	SendPassResponse(c, getCourseRespData)
 }
 
-func HandleListCourseVideosClient(c *gin.Context) {
+func HandleListCourseCatalogsClient(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	courseId := strings.TrimSpace(c.Param("id"))
 	if courseId == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle list course videos client err (course id invalid)")
+		errMsg := tlog.E(ctx).Msgf("Handle list course catalogs client err (course id invalid)")
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
 
 		return
 	}
 
-	listCourseVideosRespData, errx := service.ListCourseVideosClient(ctx, courseId)
+	listCourseCatalogsRespData, errx := service.ListCourseCatalogsClient(ctx, courseId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course videos client (course id: %s) err (list course client %v)",
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course catalogs client (course id: %s) err (list course catalogs client %v)",
 			courseId, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
@@ -196,5 +196,5 @@ func HandleListCourseVideosClient(c *gin.Context) {
 		return
 	}
 
-	SendPassResponse(c, listCourseVideosRespData)
+	SendPassResponse(c, listCourseCatalogsRespData)
 }

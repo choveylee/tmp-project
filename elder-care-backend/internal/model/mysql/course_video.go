@@ -54,7 +54,7 @@ type CourseVideo struct {
 	DeletedAt gorm.DeletedAt
 }
 
-func CreateCourseVideo(ctx context.Context, catalogId string, videoUrl string, format, language, size, duration string, uploadAt time.Time, weight, status int) (*CourseVideo, *terror.Terror) {
+func CreateCourseVideo(ctx context.Context, tx *gorm.DB, catalogId string, videoUrl string, format, language, size, duration string, uploadAt time.Time, weight, status int) (*CourseVideo, *terror.Terror) {
 	courseVideoDB := &CourseVideo{
 		Id: tutil.NewOid().String(),
 
@@ -73,9 +73,9 @@ func CreateCourseVideo(ctx context.Context, catalogId string, videoUrl string, f
 		Status: status,
 	}
 
-	retGorm := serverClient.DB(ctx, runMode).Create(courseVideoDB)
+	retGorm := tx.Create(courseVideoDB)
 	if retGorm.Error != nil {
-		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Create course video (course id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, weight: %d, status: %d) err (db create %v)",
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Create course video (catalog id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, weight: %d, status: %d) err (db create %v)",
 			catalogId, videoUrl, format, language, size, duration, uploadAt, weight, status, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
@@ -86,13 +86,13 @@ func CreateCourseVideo(ctx context.Context, catalogId string, videoUrl string, f
 	return courseVideoDB, nil
 }
 
-func FindCourseVideo(ctx context.Context, videoId string) (*CourseVideo, *terror.Terror) {
+func FindCourseVideoByCatalog(ctx context.Context, catalogId string) (*CourseVideo, *terror.Terror) {
 	courseVideosDB := make([]*CourseVideo, 0)
 
-	retGorm := serverClient.DB(ctx, runMode).Where("id = ?", videoId).Limit(1).Find(&courseVideosDB)
+	retGorm := serverClient.DB(ctx, runMode).Where("catalog_id = ?", catalogId).Limit(1).Find(&courseVideosDB)
 	if retGorm.Error != nil {
-		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find course video (video id: %s) err (db find %v)",
-			videoId, retGorm.Error)
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find course video by catalog (catalog id: %s) err (db find %v)",
+			catalogId, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 
@@ -106,10 +106,10 @@ func FindCourseVideo(ctx context.Context, videoId string) (*CourseVideo, *terror
 	return courseVideosDB[0], nil
 }
 
-func FindCourseVideos(ctx context.Context, courseId string, status int) ([]*CourseVideo, *terror.Terror) {
+func FindCourseVideosByCatalog(ctx context.Context, catalogIds []string, status int) ([]*CourseVideo, *terror.Terror) {
 	courseVideosDB := make([]*CourseVideo, 0)
 
-	retGorm := serverClient.DB(ctx, runMode).Where("course_id = ?", courseId)
+	retGorm := serverClient.DB(ctx, runMode).Where("catalog_id IN (?)", catalogIds)
 
 	if status != -1 {
 		retGorm = retGorm.Where("status = ?", status)
@@ -117,8 +117,8 @@ func FindCourseVideos(ctx context.Context, courseId string, status int) ([]*Cour
 
 	retGorm = retGorm.Order("weight ASC, created_at DESC").Find(&courseVideosDB)
 	if retGorm.Error != nil {
-		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find course videos (course id: %s, status: %d) err (db find %v)",
-			courseId, status, retGorm.Error)
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find course videos by catalog (catalog ids: %v, status: %d) err (db find %v)",
+			catalogIds, status, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 
@@ -128,7 +128,7 @@ func FindCourseVideos(ctx context.Context, courseId string, status int) ([]*Cour
 	return courseVideosDB, nil
 }
 
-func UpdateCourseVideo(ctx context.Context, videoId string, videoUrl string, format, language, size, duration string, uploadAt time.Time, weight, status int) *terror.Terror {
+func UpdateCourseVideo(ctx context.Context, tx *gorm.DB, videoId string, videoUrl string, format, language, size, duration string, uploadAt time.Time, weight, status int) *terror.Terror {
 	params := map[string]interface{}{
 		"video_url": videoUrl,
 
@@ -145,7 +145,7 @@ func UpdateCourseVideo(ctx context.Context, videoId string, videoUrl string, for
 		"updated_at": time.Now(),
 	}
 
-	retGorm := serverClient.DB(ctx, runMode).Model(&CourseVideo{}).Where("id = ?", videoId).Updates(params)
+	retGorm := tx.Model(&CourseVideo{}).Where("id = ?", videoId).Updates(params)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Update course video (video id: %s, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, weight: %d, status: %d) err (db updates %v)",
 			videoId, videoUrl, format, language, size, duration, uploadAt, weight, status, retGorm.Error)
@@ -157,8 +157,8 @@ func UpdateCourseVideo(ctx context.Context, videoId string, videoUrl string, for
 	return nil
 }
 
-func DeleteCourseVideo(ctx context.Context, videoId string) *terror.Terror {
-	retGorm := serverClient.DB(ctx, runMode).Where("id = ?", videoId).Delete(&CourseVideo{})
+func DeleteCourseVideo(ctx context.Context, tx *gorm.DB, videoId string) *terror.Terror {
+	retGorm := tx.Where("id = ?", videoId).Delete(&CourseVideo{})
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course video (video id: %s) err (db delete %v)",
 			videoId, retGorm.Error)
@@ -170,11 +170,11 @@ func DeleteCourseVideo(ctx context.Context, videoId string) *terror.Terror {
 	return nil
 }
 
-func DeleteCourseVideos(ctx context.Context, tx *gorm.DB, courseId string) *terror.Terror {
-	retGorm := tx.Where("course_id = ?", courseId).Delete(&CourseVideo{})
+func DeleteCourseVideosByCatalog(ctx context.Context, tx *gorm.DB, catalogIds []string) *terror.Terror {
+	retGorm := tx.Where("catalog_id IN (?)", catalogIds).Delete(&CourseVideo{})
 	if retGorm.Error != nil {
-		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course videos (course id: %s) err (db delete %v)",
-			courseId, retGorm.Error)
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Delete course videos by catalog (catalog ids: %v) err (db delete %v)",
+			catalogIds, retGorm.Error)
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 
 		return errx

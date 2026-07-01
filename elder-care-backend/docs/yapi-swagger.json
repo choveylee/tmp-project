@@ -140,13 +140,13 @@
         }
       }
     },
-    "/api/v1/public/courses/{id}/videos": {
+    "/api/v1/public/courses/{id}/catalogs": {
       "get": {
         "tags": ["Public Course"],
-        "summary": "公开端课程视频列表",
+        "summary": "公开端课程目录列表",
         "parameters": [{ "$ref": "#/parameters/IdPath" }],
         "responses": {
-          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseVideosClientEnvelope" } },
+          "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseCatalogsClientEnvelope" } },
           "400": { "$ref": "#/responses/ErrorResponse" }
         }
       }
@@ -491,39 +491,39 @@
         "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
       }
     },
-    "/api/v1/admin/courses/{id}/videos": {
+    "/api/v1/admin/courses/{id}/catalogs": {
       "get": {
         "tags": ["Admin Course"],
-        "summary": "课程视频列表",
+        "summary": "课程目录列表",
         "security": [{ "BearerAuth": [] }],
         "parameters": [{ "$ref": "#/parameters/IdPath" }],
-        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseVideosAdminEnvelope" } } }
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/ListCourseCatalogsAdminEnvelope" } } }
       },
       "post": {
         "tags": ["Admin Course"],
-        "summary": "创建课程视频",
+        "summary": "创建课程目录",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "$ref": "#/parameters/IdPath" },
-          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateCourseVideoAdminRequest" } }
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/CreateCourseCatalogAdminRequest" } }
         ],
-        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCourseVideoAdminEnvelope" } } }
+        "responses": { "200": { "description": "成功", "schema": { "$ref": "#/definitions/CreateCourseCatalogAdminEnvelope" } } }
       }
     },
-    "/api/v1/admin/courses/videos/{id}": {
+    "/api/v1/admin/courses/catalogs/{id}": {
       "put": {
         "tags": ["Admin Course"],
-        "summary": "编辑课程视频",
+        "summary": "编辑课程目录",
         "security": [{ "BearerAuth": [] }],
         "parameters": [
           { "$ref": "#/parameters/IdPath" },
-          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateCourseVideoAdminRequest" } }
+          { "in": "body", "name": "body", "required": true, "schema": { "$ref": "#/definitions/UpdateCourseCatalogAdminRequest" } }
         ],
         "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
       },
       "delete": {
         "tags": ["Admin Course"],
-        "summary": "删除课程视频",
+        "summary": "删除课程目录",
         "security": [{ "BearerAuth": [] }],
         "parameters": [{ "$ref": "#/parameters/IdPath" }],
         "responses": { "200": { "$ref": "#/responses/EmptySuccessResponse" } }
@@ -1097,7 +1097,7 @@
         "data": { "$ref": "#/definitions/GetCourseAdminRespData" }
       }
     },
-    "CourseVideoClientData": {
+    "CourseCatalogVideoClientData": {
       "type": "object",
       "properties": {
         "video_id": { "type": "string" },
@@ -1109,9 +1109,9 @@
         "upload_at": { "type": "string" }
       }
     },
-    "CourseVideoAdminData": {
+    "CourseCatalogVideoAdminData": {
       "allOf": [
-        { "$ref": "#/definitions/CourseVideoClientData" },
+        { "$ref": "#/definitions/CourseCatalogVideoClientData" },
         {
           "type": "object",
           "properties": {
@@ -1121,21 +1121,43 @@
         }
       ]
     },
-    "ListCourseVideosClientEnvelope": {
+    "ListCourseCatalogsClientEnvelope": {
       "type": "object",
       "properties": {
         "code": { "type": "integer", "example": 0 },
-        "data": { "type": "object", "properties": { "videos": { "type": "array", "items": { "$ref": "#/definitions/CourseVideoClientData" } } } }
+        "data": { "type": "object", "properties": { "catalogs": { "type": "array", "items": { "$ref": "#/definitions/CourseCatalogClientData" } } } }
       }
     },
-    "ListCourseVideosAdminEnvelope": {
+    "ListCourseCatalogsAdminEnvelope": {
       "type": "object",
       "properties": {
         "code": { "type": "integer", "example": 0 },
-        "data": { "type": "object", "properties": { "videos": { "type": "array", "items": { "$ref": "#/definitions/CourseVideoAdminData" } } } }
+        "data": { "type": "object", "properties": { "catalogs": { "type": "array", "items": { "$ref": "#/definitions/CourseCatalogAdminData" } } } }
       }
     },
-    "CreateCourseVideoAdminRequest": {
+    "CourseCatalogClientData": {
+      "type": "object",
+      "properties": {
+        "catalog_id": { "type": "string" },
+        "parent_id": { "type": "string" },
+        "name": { "type": "string" },
+        "video": { "$ref": "#/definitions/CourseCatalogVideoClientData" }
+      }
+    },
+    "CourseCatalogAdminData": {
+      "type": "object",
+      "properties": {
+        "catalog_id": { "type": "string" },
+        "parent_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 1024 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" },
+        "video": { "$ref": "#/definitions/CourseCatalogVideoAdminData" },
+        "created_at": { "type": "string" },
+        "updated_at": { "type": "string" }
+      }
+    },
+    "CourseCatalogVideoAdminRequest": {
       "type": "object",
       "required": ["video_url", "format", "language", "size", "duration", "upload_at", "status"],
       "properties": {
@@ -1149,12 +1171,23 @@
         "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" }
       }
     },
-    "UpdateCourseVideoAdminRequest": { "$ref": "#/definitions/CreateCourseVideoAdminRequest" },
-    "CreateCourseVideoAdminEnvelope": {
+    "CreateCourseCatalogAdminRequest": {
+      "type": "object",
+      "required": ["name", "status", "video"],
+      "properties": {
+        "parent_id": { "type": "string" },
+        "name": { "type": "string", "maxLength": 1024 },
+        "weight": { "type": "integer" },
+        "status": { "type": "integer", "enum": [0, 1], "description": "0正常，1禁用" },
+        "video": { "$ref": "#/definitions/CourseCatalogVideoAdminRequest" }
+      }
+    },
+    "UpdateCourseCatalogAdminRequest": { "$ref": "#/definitions/CreateCourseCatalogAdminRequest" },
+    "CreateCourseCatalogAdminEnvelope": {
       "type": "object",
       "properties": {
         "code": { "type": "integer", "example": 0 },
-        "data": { "type": "object", "properties": { "video_id": { "type": "string" } } }
+        "data": { "type": "object", "properties": { "catalog_id": { "type": "string" } } }
       }
     },
     "UserAdminData": {

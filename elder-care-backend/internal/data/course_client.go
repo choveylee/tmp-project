@@ -57,7 +57,7 @@ type GetCourseClientRespData struct {
 	PublishAt string `json:"publish_at"`
 }
 
-type CourseVideoClientData struct {
+type CourseCatalogVideoClientData struct {
 	VideoId string `json:"video_id"`
 
 	VideoUrl string `json:"video_url"`
@@ -70,6 +70,16 @@ type CourseVideoClientData struct {
 	UploadAt string `json:"upload_at"`
 }
 
-type ListCourseVideosClientRespData struct {
-	Videos []*CourseVideoClientData `json:"videos"`
+type CourseCatalogClientData struct {
+	CatalogId string `json:"catalog_id"`
+
+	ParentId string `json:"parent_id"`
+
+	Name string `json:"name"`
+
+	Video *CourseCatalogVideoClientData `json:"video"`
+}
+
+type ListCourseCatalogsClientRespData struct {
+	Catalogs []*CourseCatalogClientData `json:"catalogs"`
 }

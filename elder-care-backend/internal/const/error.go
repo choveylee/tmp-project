@@ -69,7 +69,8 @@ var (
 	ErrorCodeCourseTypeInvalid    = register(200216, "课程类型非法")
 	ErrorCodeCourseDetailNotExist = register(200217, "课程详情不存在")
 
-	ErrorCodeCourseVideoNotExist = register(200221, "课程视频不存在")
+	ErrorCodeCourseCatalogNotExist = register(200221, "课程目录不存在")
+	ErrorCodeCourseVideoNotExist   = register(200222, "课程视频不存在")
 )
 
 // StatusCode returns the HTTP status code mapped to errCode.
@@ -123,7 +124,7 @@ func StatusCode(errCode int) int {
 	case ErrorCodeCourseNotExist, ErrorCodeCourseInvalid, ErrorCodeCourseTypeInvalid, ErrorCodeCourseDetailNotExist:
 		return http.StatusBadRequest
 
-	case ErrorCodeCourseVideoNotExist:
+	case ErrorCodeCourseCatalogNotExist, ErrorCodeCourseVideoNotExist:
 		return http.StatusBadRequest
 
 	default:

@@ -60,7 +60,7 @@ func CreateSessionAdmin(ctx context.Context, realIp string, mobile, password str
 
 	if roleDB == nil {
 		errMsg := tlog.E(ctx).Msgf("Create session admin (real ip: %s, mobile: %s, password: %s, captcha id: %s, captcha code: %s, role id: %s) err (role not exist)",
-			realIp, mobile, password, captchaId, captchaCode)
+			realIp, mobile, password, captchaId, captchaCode, roleId)
 
 		errx := terror.NewTerror(ctx, terror.ErrSvcAbnormal("role id"), constant.ErrorCodeUnknownServerAbnormal, errMsg)
 

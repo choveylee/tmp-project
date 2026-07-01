@@ -283,6 +283,13 @@ func HandleDeleteCourseCategoryAdmin(c *gin.Context) {
 	userId := c.Request.Header.Get("user_id")
 
 	categoryId := strings.TrimSpace(c.Param("id"))
+	if categoryId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle delete course category admin err (category id invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
 
 	errx := service.DeleteCourseCategoryAdmin(ctx, userId, categoryId)
 	if errx != nil {
@@ -669,6 +676,13 @@ func HandleGetCourseAdmin(c *gin.Context) {
 	userId := c.Request.Header.Get("user_id")
 
 	courseId := strings.TrimSpace(c.Param("id"))
+	if courseId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle get course admin err (course id invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
 
 	getCourseRespData, errx := service.GetCourseAdmin(ctx, userId, courseId)
 	if errx != nil {
@@ -689,6 +703,13 @@ func HandleUpdateCourseAdmin(c *gin.Context) {
 	userId := c.Request.Header.Get("user_id")
 
 	courseId := strings.TrimSpace(c.Param("id"))
+	if courseId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course admin err (course id invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
 
 	updateCourseRequest := &data.UpdateCourseAdminRequest{}
 
@@ -919,6 +940,13 @@ func HandleDeleteCourseAdmin(c *gin.Context) {
 	userId := c.Request.Header.Get("user_id")
 
 	courseId := strings.TrimSpace(c.Param("id"))
+	if courseId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle delete course admin err (course id invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
 
 	errx := service.DeleteCourseAdmin(ctx, userId, courseId)
 	if errx != nil {
@@ -933,16 +961,23 @@ func HandleDeleteCourseAdmin(c *gin.Context) {
 	SendPassResponse(c, nil)
 }
 
-func HandleListCourseVideosAdmin(c *gin.Context) {
+func HandleListCourseCatalogsAdmin(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userId := c.Request.Header.Get("user_id")
 
 	courseId := strings.TrimSpace(c.Param("id"))
+	if courseId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle list course catalogs admin err (course id invalid)")
 
-	listCourseVideosRespData, errx := service.ListCourseVideosAdmin(ctx, userId, courseId)
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	listCourseCatalogsRespData, errx := service.ListCourseCatalogsAdmin(ctx, userId, courseId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course videos admin (user id: %s, course id: %s) err (list course videos admin %v)",
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle list course catalogs admin (user id: %s, course id: %s) err (list course catalogs admin %v)",
 			userId, courseId, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
@@ -950,23 +985,30 @@ func HandleListCourseVideosAdmin(c *gin.Context) {
 		return
 	}
 
-	SendPassResponse(c, listCourseVideosRespData)
+	SendPassResponse(c, listCourseCatalogsRespData)
 }
 
-func HandleCreateCourseVideoAdmin(c *gin.Context) {
+func HandleCreateCourseCatalogAdmin(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userId := c.Request.Header.Get("user_id")
 
 	courseId := strings.TrimSpace(c.Param("id"))
+	if courseId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (course id invalid)")
 
-	createCourseVideoRequest := &data.CreateCourseVideoAdminRequest{}
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	createCourseCatalogRequest := &data.CreateCourseCatalogAdminRequest{}
 
 	body, _ := io.ReadAll(c.Request.Body)
 
-	err := json.Unmarshal(body, createCourseVideoRequest)
+	err := json.Unmarshal(body, createCourseCatalogRequest)
 	if err != nil {
-		errMsg := tlog.E(ctx).Err(err).Msgf("Handle create course video admin (body: %s) err (request body unmarshal %v)",
+		errMsg := tlog.E(ctx).Err(err).Msgf("Handle create course catalog admin (body: %s) err (request body unmarshal %v)",
 			string(body), err)
 
 		SendFailResponse(c, constant.ErrorCodeRequestBodyInvalid, errMsg)
@@ -974,114 +1016,32 @@ func HandleCreateCourseVideoAdmin(c *gin.Context) {
 		return
 	}
 
-	videoUrl := strings.TrimSpace(createCourseVideoRequest.VideoUrl)
-	if videoUrl == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin err (video url invalid)")
+	parentId := strings.TrimSpace(createCourseCatalogRequest.ParentId)
+
+	name := strings.TrimSpace(createCourseCatalogRequest.Name)
+	if name == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (name invalid)")
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
 
 		return
 	}
 
-	if len(videoUrl) > dbmodel.CourseVideoUrlLen {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin (video url: %s) err (video url len limit)",
-			videoUrl)
+	if len(name) > dbmodel.CourseCatalogNameLen {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (name: %s) err (name len limit)",
+			name)
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
 
 		return
 	}
 
-	format := strings.TrimSpace(createCourseVideoRequest.Format)
-	if format == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin err (format invalid)")
+	weight := createCourseCatalogRequest.Weight
 
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(format) > dbmodel.CourseVideoFormatLen {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin (format: %s) err (format len limit)",
-			format)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	language := strings.TrimSpace(createCourseVideoRequest.Language)
-	if language == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin err (language invalid)")
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(language) > dbmodel.CourseVideoLanguageLen {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin (language: %s) err (language len limit)",
-			language)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	size := strings.TrimSpace(createCourseVideoRequest.Size)
-	if size == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin err (size invalid)")
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(size) > dbmodel.CourseVideoSizeLen {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin (size: %s) err (size len limit)",
-			size)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	duration := strings.TrimSpace(createCourseVideoRequest.Duration)
-	if duration == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin err (duration invalid)")
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(duration) > dbmodel.CourseVideoDurationLen {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin (duration: %s) err (duration len limit)",
-			duration)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	srcUploadAt := strings.TrimSpace(createCourseVideoRequest.UploadAt)
-
-	uploadAt, err := time.ParseInLocation(time.RFC3339, srcUploadAt, time.Local)
-	if err != nil {
-		errMsg := tlog.E(ctx).Err(err).Msgf("Handle create course video admin (upload at: %s) err (upload at parse %v)",
-			srcUploadAt, err)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	weight := createCourseVideoRequest.Weight
-
-	status := createCourseVideoRequest.Status
-	_, ok := dbmodel.CourseVideoStatusesMap[status]
+	status := createCourseCatalogRequest.Status
+	_, ok := dbmodel.CourseCatalogStatusesMap[status]
 	if !ok {
-		errMsg := tlog.E(ctx).Msgf("Handle create course video admin (status: %d) err (status invalid)",
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (status: %d) err (status invalid)",
 			status)
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
@@ -1089,33 +1049,165 @@ func HandleCreateCourseVideoAdmin(c *gin.Context) {
 		return
 	}
 
-	createCourseVideoRespData, errx := service.CreateCourseVideoAdmin(ctx, userId, courseId, videoUrl, format, language, size, duration, uploadAt, weight, status)
+	if createCourseCatalogRequest.Video == nil {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (video invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	video := createCourseCatalogRequest.Video
+
+	videoUrl := strings.TrimSpace(video.VideoUrl)
+	if videoUrl == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (video url invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(videoUrl) > dbmodel.CourseVideoUrlLen {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (video url: %s) err (video url len limit)",
+			videoUrl)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	format := strings.TrimSpace(video.Format)
+	if format == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (format invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(format) > dbmodel.CourseVideoFormatLen {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (format: %s) err (format len limit)",
+			format)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	language := strings.TrimSpace(video.Language)
+	if language == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (language invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(language) > dbmodel.CourseVideoLanguageLen {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (language: %s) err (language len limit)",
+			language)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	size := strings.TrimSpace(video.Size)
+	if size == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (size invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(size) > dbmodel.CourseVideoSizeLen {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (size: %s) err (size len limit)",
+			size)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	duration := strings.TrimSpace(video.Duration)
+	if duration == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin err (duration invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(duration) > dbmodel.CourseVideoDurationLen {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (duration: %s) err (duration len limit)",
+			duration)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	srcUploadAt := strings.TrimSpace(video.UploadAt)
+
+	uploadAt, err := time.ParseInLocation(time.RFC3339, srcUploadAt, time.Local)
+	if err != nil {
+		errMsg := tlog.E(ctx).Err(err).Msgf("Handle create course catalog admin (upload at: %s) err (upload at parse %v)",
+			srcUploadAt, err)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	videoWeight := video.Weight
+
+	videoStatus := video.Status
+	_, ok = dbmodel.CourseVideoStatusesMap[videoStatus]
+	if !ok {
+		errMsg := tlog.E(ctx).Msgf("Handle create course catalog admin (video status: %d) err (video status invalid)",
+			videoStatus)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	createCourseCatalogRespData, errx := service.CreateCourseCatalogAdmin(ctx, userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle create course video admin (user id: %s, course id: %s, video url: %d, format: %d, language: %s, size: %s, duration: %s, upload at: %v, weight: %d, status: %d) err (create course category admin %v)",
-			userId, courseId, videoUrl, format, language, size, duration, uploadAt, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle create course catalog admin (user id: %s, course id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, video weight: %d, video status: %d) err (create course catalog admin %v)",
+			userId, courseId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 
 		return
 	}
 
-	SendPassResponse(c, createCourseVideoRespData)
+	SendPassResponse(c, createCourseCatalogRespData)
 }
 
-func HandleUpdateCourseVideoAdmin(c *gin.Context) {
+func HandleUpdateCourseCatalogAdmin(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userId := c.Request.Header.Get("user_id")
 
-	videoId := strings.TrimSpace(c.Param("id"))
+	catalogId := strings.TrimSpace(c.Param("id"))
+	if catalogId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (catalog id invalid)")
 
-	updateCourseVideoRequest := &data.UpdateCourseVideoAdminRequest{}
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	updateCourseCatalogRequest := &data.UpdateCourseCatalogAdminRequest{}
 
 	body, _ := io.ReadAll(c.Request.Body)
 
-	err := json.Unmarshal(body, updateCourseVideoRequest)
+	err := json.Unmarshal(body, updateCourseCatalogRequest)
 	if err != nil {
-		errMsg := tlog.E(ctx).Err(err).Msgf("Handle update course video admin (body: %s) err (request body unmarshal %v)",
+		errMsg := tlog.E(ctx).Err(err).Msgf("Handle update course catalog admin (body: %s) err (request body unmarshal %v)",
 			string(body), err)
 
 		SendFailResponse(c, constant.ErrorCodeRequestBodyInvalid, errMsg)
@@ -1123,114 +1215,32 @@ func HandleUpdateCourseVideoAdmin(c *gin.Context) {
 		return
 	}
 
-	videoUrl := strings.TrimSpace(updateCourseVideoRequest.VideoUrl)
-	if videoUrl == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin err (video url invalid)")
+	parentId := strings.TrimSpace(updateCourseCatalogRequest.ParentId)
+
+	name := strings.TrimSpace(updateCourseCatalogRequest.Name)
+	if name == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (name invalid)")
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
 
 		return
 	}
 
-	if len(videoUrl) > dbmodel.CourseVideoUrlLen {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin (video url: %s) err (video url len limit)",
-			videoUrl)
+	if len(name) > dbmodel.CourseCatalogNameLen {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (name: %s) err (name len limit)",
+			name)
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
 
 		return
 	}
 
-	format := strings.TrimSpace(updateCourseVideoRequest.Format)
-	if format == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin err (format invalid)")
+	weight := updateCourseCatalogRequest.Weight
 
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(format) > dbmodel.CourseVideoFormatLen {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin (format: %s) err (format len limit)",
-			format)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	language := strings.TrimSpace(updateCourseVideoRequest.Language)
-	if language == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin err (language invalid)")
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(language) > dbmodel.CourseVideoLanguageLen {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin (language: %s) err (language len limit)",
-			language)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	size := strings.TrimSpace(updateCourseVideoRequest.Size)
-	if size == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin err (size invalid)")
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(size) > dbmodel.CourseVideoSizeLen {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin (size: %s) err (size len limit)",
-			size)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	duration := strings.TrimSpace(updateCourseVideoRequest.Duration)
-	if duration == "" {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin err (duration invalid)")
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	if len(duration) > dbmodel.CourseVideoDurationLen {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin (duration: %s) err (duration len limit)",
-			duration)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	srcUploadAt := strings.TrimSpace(updateCourseVideoRequest.UploadAt)
-
-	uploadAt, err := time.ParseInLocation(time.RFC3339, srcUploadAt, time.Local)
-	if err != nil {
-		errMsg := tlog.E(ctx).Err(err).Msgf("Handle update course video admin (upload at: %s) err (upload at parse %v)",
-			srcUploadAt, err)
-
-		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
-
-		return
-	}
-
-	weight := updateCourseVideoRequest.Weight
-
-	status := updateCourseVideoRequest.Status
-	_, ok := dbmodel.CourseVideoStatusesMap[status]
+	status := updateCourseCatalogRequest.Status
+	_, ok := dbmodel.CourseCatalogStatusesMap[status]
 	if !ok {
-		errMsg := tlog.E(ctx).Msgf("Handle update course video admin (status: %d) err (status invalid)",
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (status: %d) err (status invalid)",
 			status)
 
 		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
@@ -1238,10 +1248,135 @@ func HandleUpdateCourseVideoAdmin(c *gin.Context) {
 		return
 	}
 
-	errx := service.UpdateCourseVideoAdmin(ctx, userId, videoId, videoUrl, format, language, size, duration, uploadAt, weight, status)
+	if updateCourseCatalogRequest.Video == nil {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (video invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	video := updateCourseCatalogRequest.Video
+
+	videoUrl := strings.TrimSpace(video.VideoUrl)
+	if videoUrl == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (video url invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(videoUrl) > dbmodel.CourseVideoUrlLen {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (video url: %s) err (video url len limit)",
+			videoUrl)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	format := strings.TrimSpace(video.Format)
+	if format == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (format invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(format) > dbmodel.CourseVideoFormatLen {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (format: %s) err (format len limit)",
+			format)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	language := strings.TrimSpace(video.Language)
+	if language == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (language invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(language) > dbmodel.CourseVideoLanguageLen {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (language: %s) err (language len limit)",
+			language)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	size := strings.TrimSpace(video.Size)
+	if size == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (size invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(size) > dbmodel.CourseVideoSizeLen {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (size: %s) err (size len limit)",
+			size)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	duration := strings.TrimSpace(video.Duration)
+	if duration == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin err (duration invalid)")
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	if len(duration) > dbmodel.CourseVideoDurationLen {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (duration: %s) err (duration len limit)",
+			duration)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	srcUploadAt := strings.TrimSpace(video.UploadAt)
+
+	uploadAt, err := time.ParseInLocation(time.RFC3339, srcUploadAt, time.Local)
+	if err != nil {
+		errMsg := tlog.E(ctx).Err(err).Msgf("Handle update course catalog admin (upload at: %s) err (upload at parse %v)",
+			srcUploadAt, err)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	videoWeight := video.Weight
+
+	videoStatus := video.Status
+	_, ok = dbmodel.CourseVideoStatusesMap[videoStatus]
+	if !ok {
+		errMsg := tlog.E(ctx).Msgf("Handle update course catalog admin (video status: %d) err (video status invalid)",
+			videoStatus)
+
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	errx := service.UpdateCourseCatalogAdmin(ctx, userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle update course video admin (user id: %s, video id: %s, video url: %d, format: %d, language: %s, size: %s, duration: %s, upload at: %v, weight: %d, status: %d) err (update course video admin %v)",
-			userId, videoId, videoUrl, format, language, size, duration, uploadAt, weight, status, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle update course catalog admin (user id: %s, catalog id: %s, parent id: %s, name: %s, weight: %d, status: %d, video url: %s, format: %s, language: %s, size: %s, duration: %s, upload at: %v, video weight: %d, video status: %d) err (update course catalog admin %v)",
+			userId, catalogId, parentId, name, weight, status, videoUrl, format, language, size, duration, uploadAt, videoWeight, videoStatus, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 
@@ -1251,17 +1386,24 @@ func HandleUpdateCourseVideoAdmin(c *gin.Context) {
 	SendPassResponse(c, nil)
 }
 
-func HandleDeleteCourseVideoAdmin(c *gin.Context) {
+func HandleDeleteCourseCatalogAdmin(c *gin.Context) {
 	ctx := c.Request.Context()
 
 	userId := c.Request.Header.Get("user_id")
 
-	videoId := strings.TrimSpace(c.Param("id"))
+	catalogId := strings.TrimSpace(c.Param("id"))
+	if catalogId == "" {
+		errMsg := tlog.E(ctx).Msgf("Handle delete course catalog admin err (catalog id invalid)")
 
-	errx := service.DeleteCourseVideoAdmin(ctx, userId, videoId)
+		SendFailResponse(c, constant.ErrorCodeRequestParamInvalid, errMsg)
+
+		return
+	}
+
+	errx := service.DeleteCourseCatalogAdmin(ctx, userId, catalogId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle delete course video admin (user id: %s, video id: %s) err (delete course video admin %v)",
-			userId, videoId, errx)
+		errMsg := tlog.E(ctx).Err(errx).Msgf("Handle delete course catalog admin (user id: %s, catalog id: %s) err (delete course catalog admin %v)",
+			userId, catalogId, errx)
 
 		SendFailResponse(c, errx.ErrCode(), errMsg)
 

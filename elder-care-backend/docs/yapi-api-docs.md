@@ -34,7 +34,7 @@
 | GET | `/api/v1/public/courses/categories` | 课程分类列表 | 无 |
 | GET | `/api/v1/public/courses` | 课程列表 | `category_id` 必填，`course_type`，`sort_by`，`page_num`，`page_size` |
 | GET | `/api/v1/public/courses/{id}` | 课程详情 | `id` |
-| GET | `/api/v1/public/courses/{id}/videos` | 课程视频列表 | `id` |
+| GET | `/api/v1/public/courses/{id}/catalogs` | 课程目录列表 | `id`，响应含 `catalogs[].video` |
 
 公开端枚举：
 
@@ -98,14 +98,14 @@
 | GET | `/api/v1/admin/courses/{id}` | 课程详情 | `id` |
 | PUT | `/api/v1/admin/courses/{id}` | 编辑课程 | `id`，body 同创建课程但不含 `course_type` |
 | DELETE | `/api/v1/admin/courses/{id}` | 删除课程 | `id` |
-| GET | `/api/v1/admin/courses/{id}/videos` | 课程视频列表 | `id` |
-| POST | `/api/v1/admin/courses/{id}/videos` | 创建课程视频 | `id`，body: `video_url`、`format`、`language`、`size`、`duration`、`upload_at`、`weight`、`status` |
-| PUT | `/api/v1/admin/courses/videos/{id}` | 编辑课程视频 | `id`，body 同创建课程视频 |
-| DELETE | `/api/v1/admin/courses/videos/{id}` | 删除课程视频 | `id` |
+| GET | `/api/v1/admin/courses/{id}/catalogs` | 课程目录列表 | `id`，响应含 `catalogs[].video` |
+| POST | `/api/v1/admin/courses/{id}/catalogs` | 创建课程目录 | `id`，body: `parent_id`、`name`、`weight`、`status`、`video` |
+| PUT | `/api/v1/admin/courses/catalogs/{id}` | 编辑课程目录 | `id`，body 同创建课程目录，增删改目录时同步处理 `video` 信息 |
+| DELETE | `/api/v1/admin/courses/catalogs/{id}` | 删除课程目录 | `id`，同时删除对应视频 |
 
 管理端枚举：
 
 - 轮播图、文章、文章分类、课程分类 `status`：`1` 正常，`0` 禁用。
-- 课程与课程视频 `status`：`0` 正常，`1` 禁用。
+- 课程、课程目录与课程视频 `status`：`0` 正常，`1` 禁用。
 - 课程 `course_type`：`0` 普通课程，`1` 视频课程。
 

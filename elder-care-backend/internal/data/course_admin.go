@@ -176,7 +176,7 @@ type UpdateCourseAdminRequest struct {
 	Status int `json:"status"`
 }
 
-type CourseVideoAdminData struct {
+type CourseCatalogVideoAdminData struct {
 	VideoId string `json:"video_id"`
 
 	VideoUrl string `json:"video_url"`
@@ -192,11 +192,27 @@ type CourseVideoAdminData struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
-type ListCourseVideosAdminRespData struct {
-	Videos []*CourseVideoAdminData `json:"videos"`
+type CourseCatalogAdminData struct {
+	CatalogId string `json:"catalog_id"`
+
+	ParentId string `json:"parent_id"`
+
+	Name string `json:"name"`
+
+	Weight int `json:"weight"`
+	Status int `json:"status"`
+
+	Video *CourseCatalogVideoAdminData `json:"video"`
+
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
-type CreateCourseVideoAdminRequest struct {
+type ListCourseCatalogsAdminRespData struct {
+	Catalogs []*CourseCatalogAdminData `json:"catalogs"`
+}
+
+type CourseCatalogVideoAdminRequest struct {
 	VideoUrl string `json:"video_url"`
 
 	Format   string `json:"format"`
@@ -210,20 +226,19 @@ type CreateCourseVideoAdminRequest struct {
 	Status int `json:"status"`
 }
 
-type CreateCourseVideoAdminRespData struct {
-	VideoId string `json:"video_id"`
-}
+type CreateCourseCatalogAdminRequest struct {
+	ParentId string `json:"parent_id"`
 
-type UpdateCourseVideoAdminRequest struct {
-	VideoUrl string `json:"video_url"`
-
-	Format   string `json:"format"`
-	Language string `json:"language"`
-	Size     string `json:"size"`
-	Duration string `json:"duration"`
-
-	UploadAt string `json:"upload_at"`
+	Name string `json:"name"`
 
 	Weight int `json:"weight"`
 	Status int `json:"status"`
+
+	Video *CourseCatalogVideoAdminRequest `json:"video"`
 }
+
+type CreateCourseCatalogAdminRespData struct {
+	CatalogId string `json:"catalog_id"`
+}
+
+type UpdateCourseCatalogAdminRequest = CreateCourseCatalogAdminRequest

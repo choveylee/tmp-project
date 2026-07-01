@@ -12,7 +12,7 @@ func registerCourseClient(router *gin.RouterGroup) {
 	router.GET("/courses", handler.HandleListCoursesClient)
 
 	router.GET("/courses/:id", handler.HandleGetCourseClient)
-	router.GET("/courses/:id/videos", handler.HandleListCourseVideosClient)
+	router.GET("/courses/:id/catalogs", handler.HandleListCourseCatalogsClient)
 }
 
 func registerCourseAdmin(router *gin.RouterGroup) {
@@ -30,10 +30,10 @@ func registerCourseAdmin(router *gin.RouterGroup) {
 	router.PUT("/courses/:id", handler.HandleUpdateCourseAdmin)
 	router.DELETE("/courses/:id", handler.HandleDeleteCourseAdmin)
 
-	router.GET("/courses/:id/videos", handler.HandleListCourseVideosAdmin)
+	router.GET("/courses/:id/catalogs", handler.HandleListCourseCatalogsAdmin)
 
-	router.POST("/courses/:id/videos", handler.HandleCreateCourseVideoAdmin)
-	router.PUT("/courses/videos/:id", handler.HandleUpdateCourseVideoAdmin)
-	router.DELETE("/courses/videos/:id", handler.HandleDeleteCourseVideoAdmin)
+	router.POST("/courses/:id/catalogs", handler.HandleCreateCourseCatalogAdmin)
+	router.PUT("/courses/catalogs/:id", handler.HandleUpdateCourseCatalogAdmin)
+	router.DELETE("/courses/catalogs/:id", handler.HandleDeleteCourseCatalogAdmin)
 
 }

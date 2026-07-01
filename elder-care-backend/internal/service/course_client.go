@@ -153,10 +153,10 @@ func GetCourseClient(ctx context.Context, courseId string) (*data.GetCourseClien
 	return getCourseRespData, nil
 }
 
-func ListCourseVideosClient(ctx context.Context, courseId string) (*data.ListCourseVideosClientRespData, *terror.Terror) {
+func ListCourseCatalogsClient(ctx context.Context, courseId string) (*data.ListCourseCatalogsClientRespData, *terror.Terror) {
 	courseDB, errx := dbmodel.FindCourse(ctx, courseId)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("List course videos client (course id: %s) err (db find course %v)",
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs client (course id: %s) err (db find course %v)",
 			courseId, errx)
 		errx.AttachErrMsg(errMsg)
 
@@ -168,7 +168,7 @@ func ListCourseVideosClient(ctx context.Context, courseId string) (*data.ListCou
 	}
 
 	if courseDB.Status != dbmodel.CourseStatusNormal {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("List course videos client (course id: %s) err (course status invalid)",
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs client (course id: %s) err (course status invalid)",
 			courseId)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("course id"), constant.ErrorCodeCourseInvalid, errMsg)
@@ -177,7 +177,7 @@ func ListCourseVideosClient(ctx context.Context, courseId string) (*data.ListCou
 	}
 
 	if courseDB.CourseType != dbmodel.CourseTypeVideo {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("List course videos client (course id: %s) err (course type invalid)",
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs client (course id: %s) err (course type invalid)",
 			courseId)
 
 		errx := terror.NewTerror(ctx, terror.ErrParamInvalid("course id"), constant.ErrorCodeCourseTypeInvalid, errMsg)
@@ -185,35 +185,69 @@ func ListCourseVideosClient(ctx context.Context, courseId string) (*data.ListCou
 		return nil, errx
 	}
 
-	courseVideosDB, errx := dbmodel.FindCourseVideos(ctx, courseId, dbmodel.CourseVideoStatusNormal)
+	courseCatalogsDB, errx := dbmodel.FindCourseCatalogs(ctx, courseId, dbmodel.CourseCatalogStatusNormal)
 	if errx != nil {
-		errMsg := tlog.E(ctx).Err(errx).Msgf("List course videos client (course id: %s) err (db find course videos %v)",
+		errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs client (course id: %s) err (db find course catalogs %v)",
 			courseId, errx)
 		errx.AttachErrMsg(errMsg)
 
 		return nil, errx
 	}
 
-	listCourseVideosClientRespData := &data.ListCourseVideosClientRespData{
-		Videos: make([]*data.CourseVideoClientData, 0),
+	catalogIds := make([]string, 0, len(courseCatalogsDB))
+
+	for _, courseCatalogDB := range courseCatalogsDB {
+		catalogIds = append(catalogIds, courseCatalogDB.Id)
 	}
 
-	for _, courseVideoDB := range courseVideosDB {
-		courseVideoData := &data.CourseVideoClientData{
-			VideoId: courseVideoDB.Id,
+	courseVideosDBMap := make(map[string]*dbmodel.CourseVideo)
 
-			VideoUrl: courseVideoDB.VideoUrl,
+	if len(catalogIds) > 0 {
+		courseVideosDB, errx := dbmodel.FindCourseVideosByCatalog(ctx, catalogIds, dbmodel.CourseVideoStatusNormal)
+		if errx != nil {
+			errMsg := tlog.E(ctx).Err(errx).Msgf("List course catalogs client (course id: %s, catalog ids: %v) err (db find course videos %v)",
+				courseId, catalogIds, errx)
+			errx.AttachErrMsg(errMsg)
 
-			Duration: courseVideoDB.Duration,
-			Format:   courseVideoDB.Format,
-			Language: courseVideoDB.Language,
-			Size:     courseVideoDB.Size,
-
-			UploadAt: courseVideoDB.UploadAt.Format(time.RFC3339),
+			return nil, errx
 		}
 
-		listCourseVideosClientRespData.Videos = append(listCourseVideosClientRespData.Videos, courseVideoData)
+		for _, courseVideoDB := range courseVideosDB {
+			courseVideosDBMap[courseVideoDB.CatalogId] = courseVideoDB
+		}
 	}
 
-	return listCourseVideosClientRespData, nil
+	listCourseCatalogsClientRespData := &data.ListCourseCatalogsClientRespData{
+		Catalogs: make([]*data.CourseCatalogClientData, 0),
+	}
+
+	for _, courseCatalogDB := range courseCatalogsDB {
+		courseCatalogData := &data.CourseCatalogClientData{
+			CatalogId: courseCatalogDB.Id,
+
+			ParentId: courseCatalogDB.ParentId,
+
+			Name: courseCatalogDB.Name,
+		}
+
+		courseVideoDB, ok := courseVideosDBMap[courseCatalogDB.Id]
+		if ok {
+			courseCatalogData.Video = &data.CourseCatalogVideoClientData{
+				VideoId: courseVideoDB.Id,
+
+				VideoUrl: courseVideoDB.VideoUrl,
+
+				Duration: courseVideoDB.Duration,
+				Format:   courseVideoDB.Format,
+				Language: courseVideoDB.Language,
+				Size:     courseVideoDB.Size,
+
+				UploadAt: courseVideoDB.UploadAt.Format(time.RFC3339),
+			}
+		}
+
+		listCourseCatalogsClientRespData.Catalogs = append(listCourseCatalogsClientRespData.Catalogs, courseCatalogData)
+	}
+
+	return listCourseCatalogsClientRespData, nil
 }
