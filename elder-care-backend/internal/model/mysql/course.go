@@ -113,7 +113,7 @@ func CreateCourse(ctx context.Context, tx *gorm.DB, categoryId string, courseTyp
 		Status: status,
 	}
 
-	retGorm := serverClient.DB(ctx, runMode).Create(courseDB)
+	retGorm := tx.Create(courseDB)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Create course (category id: %s, course type: %d, author: %s, source: %s, title: %s, abstract: %s, cover url: %s, link url: %s, publish at: %v, status: %d) err (db create %v)",
 			categoryId, courseType, author, source, title, abstract, coverUrl, linkUrl, publishAt, status, retGorm.Error)
@@ -150,7 +150,7 @@ func FindCourses(ctx context.Context, categoryId string, courseType int, status 
 	query := serverClient.DB(ctx, runMode)
 
 	if categoryId != "" {
-		query = query.Where("course_type = ?", courseType)
+		query = query.Where("category_id = ?", categoryId)
 	}
 
 	if courseType != -1 {
@@ -196,7 +196,7 @@ func FindCourses(ctx context.Context, categoryId string, courseType int, status 
 		retGorm = retGorm.Order("publish_at DESC, created_at DESC")
 	}
 
-	retGorm = query.Find(&coursesDB)
+	retGorm = retGorm.Find(&coursesDB)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find courses (category id: %s, course type: %d, status: %d, sort by: %s, page num: %d, page size: %d) err (db find %v)",
 			categoryId, courseType, status, sortBy, pageNum, pageSize, retGorm.Error)
@@ -225,8 +225,10 @@ func FindCourseCountByCategory(ctx context.Context, categoryId string) (int64, *
 	return total, nil
 }
 
-func UpdateCourse(ctx context.Context, tx *gorm.DB, courseId string, author, source, title, abstract, coverUrl, linkUrl string, publishAt *time.Time, status int) *terror.Terror {
+func UpdateCourse(ctx context.Context, tx *gorm.DB, courseId string, categoryId string, author, source, title, abstract, coverUrl, linkUrl string, publishAt *time.Time, status int) *terror.Terror {
 	params := map[string]interface{}{
+		"category_id": categoryId,
+
 		"author": author,
 		"source": source,
 
@@ -239,12 +241,14 @@ func UpdateCourse(ctx context.Context, tx *gorm.DB, courseId string, author, sou
 		"publish_at": publishAt,
 
 		"status": status,
+
+		"updated_at": time.Now(),
 	}
 
 	retGorm := tx.Model(&Course{}).Where("id = ?", courseId).Updates(params)
 	if retGorm.Error != nil {
-		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Update course (course id: %s, author: %s, source: %s, title: %s, abstract: %s, cover url: %s, link url: %s, publish at: %v, status: %d) err (db update %v)",
-			courseId, author, source, title, abstract, coverUrl, linkUrl, publishAt, status, retGorm.Error)
+		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Update course (course id: %s, category id: %s, author: %s, source: %s, title: %s, abstract: %s, cover url: %s, link url: %s, publish at: %v, status: %d) err (db update %v)",
+			courseId, categoryId, author, source, title, abstract, coverUrl, linkUrl, publishAt, status, retGorm.Error)
 
 		errx := terror.NewTerror(ctx, retGorm.Error, constant.ErrorCodeMysqlServerAbnormal, errMsg)
 

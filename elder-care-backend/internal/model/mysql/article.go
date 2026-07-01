@@ -139,7 +139,7 @@ func FindArticles(ctx context.Context, categoryId string, status int, pageNum, p
 		retGorm = retGorm.Offset((pageNum - 1) * pageSize).Limit(pageSize)
 	}
 
-	retGorm = query.Order("publish_at DESC, created_at DESC").Find(&articlesDB)
+	retGorm = retGorm.Order("publish_at DESC, created_at DESC").Find(&articlesDB)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find articles (category id: %s, status: %d, page num: %d, page size: %d) err (db find %v)",
 			categoryId, status, pageNum, pageSize, retGorm.Error)

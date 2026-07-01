@@ -314,12 +314,14 @@ func ListCoursesAdmin(ctx context.Context, userId string, categoryId string, cou
 			CoverUrl: courseDB.CoverUrl,
 			LinkUrl:  courseDB.LinkUrl,
 
-			PublishAt: courseDB.PublishAt.Format(time.RFC3339),
-
 			Status: courseDB.Status,
 
 			CreatedAt: courseDB.CreatedAt.Format(time.RFC3339),
 			UpdatedAt: courseDB.UpdatedAt.Format(time.RFC3339),
+		}
+
+		if courseDB.PublishAt != nil {
+			courseData.PublishAt = courseDB.PublishAt.Format(time.RFC3339)
 		}
 
 		categoryIdsMap[courseDB.CategoryId] = true
@@ -524,10 +526,12 @@ func GetCourseAdmin(ctx context.Context, userId string, courseId string) (*data.
 		Outline:    courseDetailDB.Outline,
 		References: courseDetailDB.References,
 
-		PublishAt: courseDB.PublishAt.Format(time.RFC3339),
-
 		CreatedAt: courseDB.CreatedAt.Format(time.RFC3339),
 		UpdatedAt: courseDB.UpdatedAt.Format(time.RFC3339),
+	}
+
+	if courseDB.PublishAt != nil {
+		getCourseRespData.PublishAt = courseDB.PublishAt.Format(time.RFC3339)
 	}
 
 	for _, courseTagDB := range courseTagsDB {
@@ -577,7 +581,7 @@ func UpdateCourseAdmin(ctx context.Context, userId string, courseId string, cate
 	}
 
 	err := dbmodel.DB(ctx).Transaction(func(tx *gorm.DB) error {
-		errx := dbmodel.UpdateCourse(ctx, tx, courseId, author, source, title, abstract, coverUrl, linkUrl, publishAt, status)
+		errx := dbmodel.UpdateCourse(ctx, tx, courseId, categoryId, author, source, title, abstract, coverUrl, linkUrl, publishAt, status)
 		if errx != nil {
 			errMsg := tlog.E(ctx).Err(errx).Msgf("Update course admin (user id: %s, course id: %s, category id: %s, author: %s, source: %s, title: %s, tags: %v, abstract: %s, cover url: %s, link url: %s, detail: %s, summary: %s, objective: %s, outline: %s, references: %s, publish at: %s, status: %d) err (db update course %v)",
 				userId, courseId, categoryId, author, source, title, tags, abstract, coverUrl, linkUrl, detail, summary, objective, outline, references, publishAt, status, errx)

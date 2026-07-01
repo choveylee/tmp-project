@@ -87,8 +87,10 @@ func ListCoursesClient(ctx context.Context, categoryId string, courseType int, s
 
 			CoverUrl: courseDB.CoverUrl,
 			LinkUrl:  courseDB.LinkUrl,
+		}
 
-			PublishAt: courseDB.PublishAt.Format(time.RFC3339),
+		if courseDB.PublishAt != nil {
+			courseData.PublishAt = courseDB.PublishAt.Format(time.RFC3339)
 		}
 
 		listCoursesRespData.Courses = append(listCoursesRespData.Courses, courseData)
@@ -137,8 +139,10 @@ func GetCourseClient(ctx context.Context, courseId string) (*data.GetCourseClien
 
 		FavouriteCount: courseDB.FavouriteCount,
 		ViewCount:      courseDB.ViewCount,
+	}
 
-		PublishAt: courseDB.PublishAt.Format(time.RFC3339),
+	if courseDB.PublishAt != nil {
+		getCourseRespData.PublishAt = courseDB.PublishAt.Format(time.RFC3339)
 	}
 
 	courseTagsDB, errx := dbmodel.FindCourseTags(ctx, courseId)

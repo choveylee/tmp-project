@@ -56,7 +56,7 @@ func CreateCourseTags(ctx context.Context, tx *gorm.DB, courseId string, names [
 func FindCourseTags(ctx context.Context, courseId string) ([]*CourseTag, *terror.Terror) {
 	courseTagsDB := make([]*CourseTag, 0)
 
-	retGorm := serverClient.DB(ctx, runMode).Where("id = ?", courseId).Find(&courseTagsDB)
+	retGorm := serverClient.DB(ctx, runMode).Where("course_id = ?", courseId).Find(&courseTagsDB)
 	if retGorm.Error != nil {
 		errMsg := tlog.E(ctx).Err(retGorm.Error).Msgf("Find course tags (course id: %s) err (db find %v)",
 			courseId, retGorm.Error)
