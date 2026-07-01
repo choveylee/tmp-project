@@ -12,12 +12,12 @@ import (
 )
 
 const (
-	CourseDetailLenLimit  = 65535
-	CourseSummaryLenLimit = 65535
+	CourseDetailLenLimit  = 16777215
+	CourseSummaryLenLimit = 16777215
 
-	CourseObjectiveLenLimit  = 65535
-	CourseOutlineLenLimit    = 65535
-	CourseReferencesLenLimit = 65535
+	CourseObjectiveLenLimit  = 16777215
+	CourseOutlineLenLimit    = 16777215
+	CourseReferencesLenLimit = 16777215
 )
 
 type CourseDetail struct {

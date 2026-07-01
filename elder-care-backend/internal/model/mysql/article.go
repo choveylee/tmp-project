@@ -14,8 +14,8 @@ import (
 
 const (
 	ArticleTitleLen    = 1024
-	ArticleAbstractLen = 1024
-	ArticleContentLen  = 65535
+	ArticleAbstractLen = 65535
+	ArticleContentLen  = 16777215
 )
 
 const (

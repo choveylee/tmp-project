@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	ArticleCategoryNameLen = 64
+	ArticleCategoryNameLen = 32
 )
 
 const (

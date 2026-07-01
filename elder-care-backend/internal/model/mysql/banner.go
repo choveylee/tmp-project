@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	BannerTitleLen    = 50
-	BannerAbstractLen = 100
+	BannerTitleLen    = 1024
+	BannerAbstractLen = 65535
 )
 
 const (

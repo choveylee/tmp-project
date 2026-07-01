@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	CourseAuthorLenLimit = 1024
+	CourseAuthorLenLimit = 255
 	CourseSourceLenLimit = 1024
 
 	CourseTitleLenLimit    = 1024
-	CourseAbstractLenLimit = 1024
+	CourseAbstractLenLimit = 65535
 
 	CourseCoverUrlLenLimit = 1024
 	CourseLinkUrlLenLimit  = 1024
@@ -38,8 +38,8 @@ var (
 )
 
 const (
-	CourseTypeNormal = 0
-	CourseTypeVideo  = 1
+	CourseTypeVideo  = 0
+	CourseTypeNormal = 1
 )
 
 var (
@@ -50,8 +50,8 @@ var (
 )
 
 const (
-	CourseStatusNormal   = 0
-	CourseStatusDisabled = 1
+	CourseStatusNormal   = 1
+	CourseStatusDisabled = 0
 )
 
 var (

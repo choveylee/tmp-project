@@ -14,10 +14,10 @@ import (
 
 const (
 	CourseVideoUrlLen      = 1024
-	CourseVideoFormatLen   = 32
-	CourseVideoLanguageLen = 32
-	CourseVideoSizeLen     = 32
-	CourseVideoDurationLen = 32
+	CourseVideoFormatLen   = 255
+	CourseVideoLanguageLen = 255
+	CourseVideoSizeLen     = 255
+	CourseVideoDurationLen = 255
 )
 
 type CourseVideo struct {
